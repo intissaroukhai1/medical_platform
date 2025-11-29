@@ -1,0 +1,60 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Mon Dossier - Dawini{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div style="font-weight: 700; color: var(--primary);">🏥 DAWINI - Patient</div>
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <span>{{ app.user.nom }}</span>
+        <button onclick="alert('Déconnexion')" class="nav-item">Déconnexion</button>
+    </div>
+</nav>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar" style="width: 250px;">
+    <h3 style="font-weight: 700; margin-bottom: 1.5rem;">Menu</h3>
+    <a href="#" class="nav-item active" style="display: block; margin-bottom: 0.5rem;">🏥 Mon Dossier</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">📅 Mes RDV</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">🔍 Chercher un Médecin</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">💊 Ordonnances</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">⚙️ Paramètres</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">Mon Dossier Médical</h1>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div class="card">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Informations Personnelles</h2>
+        <div style="margin-bottom: 1rem;">
+            <p style="color: #6B7280; font-size: 0.875rem;">NUMÉRO CIN</p>
+            <p style="font-weight: 600;">{{ patient.numeroCIN }}</p>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <p style="color: #6B7280; font-size: 0.875rem;">GENRE</p>
+            <p style="font-weight: 600;">{{ patient.genre }}</p>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <p style="color: #6B7280; font-size: 0.875rem;">GROUPE SANGUIN</p>
+            <p style="font-weight: 600;">{{ patient.groupeSanguin }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Rendez-vous Prochains</h2>
+        {% if patient.rendezVous | length > 0 %}
+            {% for rdv in patient.rendezVous | slice(0, 3) %}
+            <div style="padding: 1rem; background-color: var(--neutral-light); border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                <p style="font-weight: 600;">{{ rdv.medecin.nom }}</p>
+                <p style="font-size: 0.875rem; color: #6B7280;">{{ rdv.date | date('d/m/Y') }} à {{ rdv.heureDebut | date('H:i') }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #6B7280;">Aucun rendez-vous programmé</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

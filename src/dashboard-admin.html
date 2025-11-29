@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Dawini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #0052A3;
+            --secondary: #00C9A7;
+            --accent: #FF6B6B;
+            --warning: #F59E0B;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--bg);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: var(--bg);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+            padding-left: calc(1.5rem - 3px);
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .table-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-box {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 250px;
+            font-size: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--bg);
+            border-bottom: 2px solid var(--border);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 102, 204, 0.02);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: #D1F2EB;
+            color: #065F46;
+        }
+
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-inactive {
+            background-color: #FEE2E2;
+            color: #7F1D1D;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        .role-doctor {
+            background: #DDD6FE;
+            color: #4C1D95;
+        }
+
+        .role-patient {
+            background: #DBEAFE;
+            color: #0C2D48;
+        }
+
+        .role-secretary {
+            background: #D1E7DD;
+            color: #0B2818;
+        }
+
+        .role-admin {
+            background: #FCE7F3;
+            color: #7F225B;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #00B896;
+        }
+
+        .btn-danger {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #E55555;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">Dawini</div>
+            <ul class="sidebar-menu">
+                <li><a class="active" onclick="navigateTo('overview')">📊 Aperçu</a></li>
+                <li><a onclick="navigateTo('users')">👥 Utilisateurs</a></li>
+                <li><a onclick="navigateTo('doctors')">👨‍⚕️ Médecins</a></li>
+                <li><a onclick="navigateTo('specialities')">🏥 Spécialités</a></li>
+                <li><a onclick="navigateTo('subscriptions')">💳 Abonnements</a></li>
+                <li><a onclick="navigateTo('reports')">📈 Rapports</a></li>
+                <li><a onclick="navigateTo('settings')">⚙️ Paramètres</a></li>
+                <li><a onclick="logout()">🚪 Déconnexion</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1>Dashboard Admin</h1>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="user-name">Administrateur Système</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                    <div class="user-avatar">AS</div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Utilisateurs Totaux</div>
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-change">↑ 12% ce mois</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Médecins Actifs</div>
+                    <div class="stat-value">87</div>
+                    <div class="stat-change">↑ 5% ce mois</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Consultations</div>
+                    <div class="stat-value">5,234</div>
+                    <div class="stat-change">↑ 23% ce mois</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Revenus</div>
+                    <div class="stat-value">45,230 DH</div>
+                    <div class="stat-change">↑ 18% ce mois</div>
+                </div>
+            </div>
+
+            <!-- Users Management -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h2 class="section-title">Gestion des Utilisateurs</h2>
+                    <div class="table-actions">
+                        <input type="text" class="search-box" placeholder="Rechercher un utilisateur...">
+                        <button class="btn btn-primary" onclick="alert('Ajouter utilisateur')">+ Nouveau</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Date Inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Ahmed El Alami</strong></td>
+                            <td>ahmed@dawini.com</td>
+                            <td><span class="role-badge role-doctor">Médecin</span></td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>15 Nov 2024</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Bloquer')">Bloquer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Youssef Bouhmala</strong></td>
+                            <td>youssef@dawini.com</td>
+                            <td><span class="role-badge role-patient">Patient</span></td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>20 Oct 2024</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Bloquer')">Bloquer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Layla Hassan</strong></td>
+                            <td>layla@dawini.com</td>
+                            <td><span class="role-badge role-secretary">Secrétaire</span></td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>10 Sep 2024</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Bloquer')">Bloquer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fatima Zahra</strong></td>
+                            <td>fatima@dawini.com</td>
+                            <td><span class="role-badge role-doctor">Médecin</span></td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>05 Sep 2024</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Bloquer')">Bloquer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hassan Khouibi</strong></td>
+                            <td>hassan@dawini.com</td>
+                            <td><span class="role-badge role-patient">Patient</span></td>
+                            <td><span class="status-badge status-pending">En attente</span></td>
+                            <td>28 Nov 2024</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Supprimer')">Supprimer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mohamed Bennani</strong></td>
+                            <td>mohamed@dawini.com</td>
+                            <td><span class="role-badge role-doctor">Médecin</span></td>
+                            <td><span class="status-badge status-inactive">Inactif</span></td>
+                            <td>01 Aug 2024</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Supprimer')">Supprimer</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Specialties Management -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h2 class="section-title">Gestion des Spécialités</h2>
+                    <button class="btn btn-primary" onclick="alert('Ajouter spécialité')">+ Nouvelle Spécialité</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Médecins</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Cardiologie</strong></td>
+                            <td>Maladie du cœur</td>
+                            <td>12</td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Supprimer')">Supprimer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dermatologie</strong></td>
+                            <td>Maladie de la peau</td>
+                            <td>8</td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Supprimer')">Supprimer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pédiatrie</strong></td>
+                            <td>Médecine enfant</td>
+                            <td>15</td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Supprimer')">Supprimer</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Médecine Générale</strong></td>
+                            <td>Médecin généraliste</td>
+                            <td>32</td>
+                            <td><span class="status-badge status-active">Actif</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-small" onclick="alert('Éditer')">Éditer</button>
+                                    <button class="btn btn-danger btn-small" onclick="alert('Supprimer')">Supprimer</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            alert(`Navigation vers: ${page}`);
+        }
+
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,17 +1,122 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dawini - Plateforme Médicale{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #7C3AED;
+            --primary-light: #A78BFA;
+            --secondary: #EC4899;
+            --accent: #06B6D4;
+            --neutral-bg: #FFFFFF;
+            --neutral-dark: #1F2937;
+            --neutral-light: #F3F4F6;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+        }
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--neutral-dark);
+            background-color: var(--neutral-bg);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: var(--neutral-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background-color: rgba(124, 58, 237, 0.1);
+            color: var(--primary);
+        }
+
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .sidebar {
+            background-color: var(--neutral-light);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .navbar {
+            background-color: var(--neutral-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-item {
+            color: var(--neutral-dark);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: rgba(124, 58, 237, 0.1);
+            color: var(--primary);
+        }
+    </style>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    {% block navbar %}{% endblock %}
+    
+    {% if app.user %}
+        <div style="display: flex;">
+            {% block sidebar %}{% endblock %}
+            <main style="flex: 1; padding: 2rem;">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    {% else %}
+        {% block public_content %}{% endblock %}
+    {% endif %}
+
+    {% block javascripts %}{% endblock %}
+</body>
 </html>

@@ -1,0 +1,62 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Dawini - Trouvez un Médecin{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">
+        🏥 DAWINI
+    </div>
+    <div>
+        <a href="{{ path('app_login') }}" class="nav-item">Connexion</a>
+        <a href="{{ path('app_register') }}" class="btn-primary" style="margin-left: 1rem;">S'inscrire</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block public_content %}
+<div style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 4rem 2rem; text-align: center;">
+    <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">Trouvez le Médecin Idéal</h1>
+    <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9;">Accédez aux meilleurs professionnels de santé près de chez vous</p>
+    
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto;">
+        <input type="text" placeholder="Rechercher une spécialité..." 
+            style="padding: 0.75rem 1rem; border-radius: 0.5rem; flex: 1; min-width: 250px; border: none;">
+        <input type="text" placeholder="Ville ou code postal..." 
+            style="padding: 0.75rem 1rem; border-radius: 0.5rem; flex: 1; min-width: 250px; border: none;">
+        <button class="btn-primary" style="background-color: var(--accent);">Rechercher</button>
+    </div>
+</div>
+
+<div style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
+    <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 3rem; text-align: center;">Spécialités Principales</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        {% for specialite in specialites %}
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{ specialite.nom }}</h3>
+            <p style="color: #6B7280; margin-bottom: 1rem;">{{ specialite.description }}</p>
+            <a href="#" class="btn-primary" style="display: inline-block;">Voir les médecins</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div style="background-color: var(--neutral-light); padding: 3rem 2rem;">
+    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; text-align: center;">
+        <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">500+</div>
+            <p>Médecins Disponibles</p>
+        </div>
+        <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--secondary);">10k+</div>
+            <p>Consultations Réussies</p>
+        </div>
+        <div>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">4.8/5</div>
+            <p>Note Moyenne</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

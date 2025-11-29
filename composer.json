@@ -10,6 +10,7 @@
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.5",
+        "firebase/php-jwt": "*",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.3",
         "symfony/asset": "7.4.*",
@@ -27,6 +28,7 @@
         "symfony/mime": "7.4.*",
         "symfony/monolog-bundle": "^3.0|^4.0",
         "symfony/notifier": "7.4.*",
+        "symfony/password-hasher": "7.4.*",
         "symfony/process": "7.4.*",
         "symfony/property-access": "7.4.*",
         "symfony/property-info": "7.4.*",
@@ -37,12 +39,14 @@
         "symfony/string": "7.4.*",
         "symfony/translation": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
+        "symfony/uid": "7.4.*",
         "symfony/ux-turbo": "^2.31",
         "symfony/validator": "7.4.*",
         "symfony/web-link": "7.4.*",
         "symfony/yaml": "7.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
+        "web-token/jwt-framework": "^4.1"
     },
     "config": {
         "allow-plugins": {
@@ -96,12 +100,14 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "phpunit/phpunit": "^11.5",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",
         "symfony/debug-bundle": "7.4.*",
         "symfony/maker-bundle": "^1.0",
         "symfony/stopwatch": "7.4.*",
-        "symfony/web-profiler-bundle": "7.4.*"
+        "symfony/web-profiler-bundle": "7.4.*",
+        "zenstruck/foundry": "^2.8"
     }
 }

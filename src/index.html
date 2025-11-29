@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dawini - Plateforme Médicale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #0052A3;
+            --secondary: #00C9A7;
+            --accent: #FF6B6B;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background-color: white;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-white:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--surface);
+            padding: 3rem 2rem;
+            margin: -2rem 2rem 0;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-section h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        input, select {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) / 2);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-grid.full {
+            grid-column: 1 / -1;
+        }
+
+        .btn-search {
+            grid-column: 1 / -1;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Doctors Grid */
+        .doctors-section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .doctors-section h2 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .doctor-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+
+        .doctor-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .doctor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .doctor-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .doctor-speciality {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .doctor-body {
+            padding: 1.5rem;
+        }
+
+        .doctor-info {
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .doctor-info strong {
+            display: block;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .doctor-info span {
+            color: var(--text-primary);
+        }
+
+        .doctor-rating {
+            display: flex;
+            gap: 0.25rem;
+            margin: 1rem 0;
+        }
+
+        .star {
+            color: #FFC107;
+            font-size: 1.2rem;
+        }
+
+        .doctor-footer {
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-book {
+            width: 100%;
+            background-color: var(--secondary);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 0.75rem;
+            border-radius: calc(var(--radius) / 2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-book:hover {
+            background-color: #00B896;
+        }
+
+        /* Navigation links for dashboards */
+        .dashboard-nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-nav a {
+            padding: 0.75rem 1.5rem;
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dashboard-nav a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dashboard-nav a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .doctors-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Dawini</div>
+        <ul>
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="#medecins">Médecins</a></li>
+            <li><a href="#apropos">À propos</a></li>
+        </ul>
+        <div class="auth-buttons">
+            <button class="btn btn-secondary" onclick="showLogin()">Connexion</button>
+            <button class="btn btn-primary" onclick="showRegister()">Inscription</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+        <h1>Trouvez et Consultez un Médecin en Ligne</h1>
+        <p>Dawini : La plateforme médicale moderne pour une meilleure santé</p>
+        <div class="hero-buttons">
+            <button class="btn btn-white" onclick="document.querySelector('.search-section').scrollIntoView()">Chercher un Médecin</button>
+            <button class="btn btn-primary" onclick="showLogin()">Se Connecter</button>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section" id="medecins">
+        <h2>Trouver un Médecin</h2>
+        <form>
+            <div class="search-grid">
+                <div class="form-group">
+                    <label for="speciality">Spécialité</label>
+                    <select id="speciality">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="cardiologue">Cardiologue</option>
+                        <option value="dermatologue">Dermatologue</option>
+                        <option value="medecin-general">Médecin Général</option>
+                        <option value="pediatre">Pédiatre</option>
+                        <option value="chirurgien">Chirurgien</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location">Localisation</label>
+                    <input type="text" id="location" placeholder="Ville ou région">
+                </div>
+                <div class="form-group full">
+                    <label for="doctor-name">Nom du Médecin (optionnel)</label>
+                    <input type="text" id="doctor-name" placeholder="Entrez le nom du médecin">
+                </div>
+            </div>
+            <button type="button" class="btn btn-search" onclick="searchDoctors()">Rechercher</button>
+        </form>
+    </section>
+
+    <!-- Doctors List -->
+    <section class="doctors-section">
+        <h2>Médecins Disponibles</h2>
+        <div class="doctors-grid" id="doctors-grid">
+            <div class="doctor-card">
+                <div class="doctor-header">
+                    <div class="doctor-avatar">👨‍⚕️</div>
+                    <div class="doctor-name">Dr. Ahmed El Alami</div>
+                    <div class="doctor-speciality">Cardiologue</div>
+                </div>
+                <div class="doctor-body">
+                    <div class="doctor-info">
+                        <strong>Expérience:</strong>
+                        <span>15 ans</span>
+                    </div>
+                    <div class="doctor-info">
+                        <strong>Localisation:</strong>
+                        <span>Casablanca</span>
+                    </div>
+                    <div class="doctor-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span style="margin-left: 0.5rem; color: var(--text-secondary);">(47 avis)</span>
+                    </div>
+                    <div class="doctor-footer">
+                        <button class="btn-book" onclick="showDashboardOptions('medecin')">Prendre RDV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card">
+                <div class="doctor-header">
+                    <div class="doctor-avatar">👩‍⚕️</div>
+                    <div class="doctor-name">Dr. Fatima Zahra</div>
+                    <div class="doctor-speciality">Dermatologue</div>
+                </div>
+                <div class="doctor-body">
+                    <div class="doctor-info">
+                        <strong>Expérience:</strong>
+                        <span>12 ans</span>
+                    </div>
+                    <div class="doctor-info">
+                        <strong>Localisation:</strong>
+                        <span>Rabat</span>
+                    </div>
+                    <div class="doctor-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span style="margin-left: 0.5rem; color: var(--text-secondary);">(38 avis)</span>
+                    </div>
+                    <div class="doctor-footer">
+                        <button class="btn-book" onclick="showDashboardOptions('medecin')">Prendre RDV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card">
+                <div class="doctor-header">
+                    <div class="doctor-avatar">👨‍⚕️</div>
+                    <div class="doctor-name">Dr. Mohamed Bennani</div>
+                    <div class="doctor-speciality">Médecin Général</div>
+                </div>
+                <div class="doctor-body">
+                    <div class="doctor-info">
+                        <strong>Expérience:</strong>
+                        <span>20 ans</span>
+                    </div>
+                    <div class="doctor-info">
+                        <strong>Localisation:</strong>
+                        <span>Fès</span>
+                    </div>
+                    <div class="doctor-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">☆</span>
+                        <span style="margin-left: 0.5rem; color: var(--text-secondary);">(52 avis)</span>
+                    </div>
+                    <div class="doctor-footer">
+                        <button class="btn-book" onclick="showDashboardOptions('medecin')">Prendre RDV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-card">
+                <div class="doctor-header">
+                    <div class="doctor-avatar">👩‍⚕️</div>
+                    <div class="doctor-name">Dr. Leila Mansouri</div>
+                    <div class="doctor-speciality">Pédiatre</div>
+                </div>
+                <div class="doctor-body">
+                    <div class="doctor-info">
+                        <strong>Expérience:</strong>
+                        <span>10 ans</span>
+                    </div>
+                    <div class="doctor-info">
+                        <strong>Localisation:</strong>
+                        <span>Marrakech</span>
+                    </div>
+                    <div class="doctor-rating">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span style="margin-left: 0.5rem; color: var(--text-secondary);">(61 avis)</span>
+                    </div>
+                    <div class="doctor-footer">
+                        <button class="btn-book" onclick="showDashboardOptions('medecin')">Prendre RDV</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Navigation -->
+    <section style="text-align: center; padding: 3rem 2rem; background: var(--bg);">
+        <h2 style="margin-bottom: 2rem;">Accéder aux Dashboards</h2>
+        <div class="dashboard-nav">
+            <a href="#" onclick="showDashboard('patient')">Dashboard Patient</a>
+            <a href="#" onclick="showDashboard('medecin')">Dashboard Médecin</a>
+            <a href="#" onclick="showDashboard('secretaire')">Dashboard Secrétaire</a>
+            <a href="#" onclick="showDashboard('admin')">Dashboard Admin</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Dawini - Plateforme Médicale. Tous droits réservés.</p>
+    </footer>
+
+    <script>
+        function showLogin() {
+            alert('Redirection vers page de connexion');
+        }
+
+        function showRegister() {
+            alert('Redirection vers page d\'inscription');
+        }
+
+        function searchDoctors() {
+            alert('Recherche en cours...');
+        }
+
+        function showDashboardOptions(role) {
+            alert(`Redirection vers dashboard ${role}`);
+        }
+
+        function showDashboard(role) {
+            window.location.href = `dashboard-${role}.html`;
+        }
+    </script>
+</body>
+</html>

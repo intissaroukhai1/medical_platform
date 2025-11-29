@@ -1,0 +1,70 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Dashboard Médecin - Dawini{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <div style="font-weight: 700; color: var(--primary);">🏥 DAWINI - Médecin</div>
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <span>Dr. {{ app.user.nom }}</span>
+        <button onclick="alert('Déconnexion')" class="nav-item">Déconnexion</button>
+    </div>
+</nav>
+{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar" style="width: 250px;">
+    <h3 style="font-weight: 700; margin-bottom: 1.5rem;">Menu</h3>
+    <a href="#" class="nav-item active" style="display: block; margin-bottom: 0.5rem;">📅 Agenda</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">📋 Mes Patients</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">💊 Ordonnances</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">⏰ Disponibilités</a>
+    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">⚙️ Paramètres</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">Mon Dashboard</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+        <div style="color: var(--primary); font-size: 2rem;">👥</div>
+        <p style="color: #6B7280; margin-top: 0.5rem;">Patients</p>
+        <h3 style="font-size: 2rem; font-weight: 700;">{{ medecin.patients | length }}</h3>
+    </div>
+    <div class="card">
+        <div style="color: var(--secondary); font-size: 2rem;">📅</div>
+        <p style="color: #6B7280; margin-top: 0.5rem;">RDV Aujourd'hui</p>
+        <h3 style="font-size: 2rem; font-weight: 700;">{{ rdv_today | length }}</h3>
+    </div>
+    <div class="card">
+        <div style="color: var(--success); font-size: 2rem;">✓</div>
+        <p style="color: #6B7280; margin-top: 0.5rem;">Consultations</p>
+        <h3 style="font-size: 2rem; font-weight: 700;">{{ medecin.consultations | length }}</h3>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Rendez-vous d'Aujourd'hui</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+                <th style="text-align: left; padding: 1rem; font-weight: 600;">Heure</th>
+                <th style="text-align: left; padding: 1rem; font-weight: 600;">Patient</th>
+                <th style="text-align: left; padding: 1rem; font-weight: 600;">Motif</th>
+                <th style="text-align: left; padding: 1rem; font-weight: 600;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rdv in rdv_today %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 1rem;">{{ rdv.heureDebut | date('H:i') }}</td>
+                <td style="padding: 1rem;">{{ rdv.patient.nom }}</td>
+                <td style="padding: 1rem;">{{ rdv.motif }}</td>
+                <td style="padding: 1rem;"><span class="badge badge-success">Confirmé</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
