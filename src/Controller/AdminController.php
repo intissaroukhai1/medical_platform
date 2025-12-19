@@ -43,7 +43,7 @@ public function profile(Request $request, EntityManagerInterface $em)
         return $this->redirectToRoute('admin_dashboard');
     }
 
-    return $this->render('admin/profile.html.twig', [
+    return $this->render('profile/profile_admin.html.twig', [
         'form' => $form->createView(),
     ]);
 }

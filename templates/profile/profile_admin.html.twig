@@ -474,52 +474,47 @@ form {
 
         <div class="text-center mb-4">
             <div style="width:120px;height:120px;margin:auto;border-radius:50%;overflow:hidden;">
-                {% if user.photoProfil %}
-                    <img src="{{ asset('uploads/photos/' ~ user.photoProfil) }}"
-                         style="width:100%;height:100%;object-fit:cover;">
-                {% else %}
-                    <div style="
-                        width:100%;
-                        height:100%;
-                        background:#667eea;
-                        color:white;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        font-size:48px;
-                        font-weight:bold;">
-                        {{ user.nom|slice(0,1)|upper }}
-                    </div>
-                {% endif %}
+                {% if app.user.photoProfil %}
+    <img src="{{ asset('uploads/photos/' ~ app.user.photoProfil) }}"
+         style="width:100%;height:100%;object-fit:cover;">
+{% else %}
+    <div style="
+        width:100%;
+        height:100%;
+        background:#667eea;
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:48px;
+        font-weight:bold;">
+        {{ app.user.nom|slice(0,1)|upper }}
+    </div>
+{% endif %}
             </div>
         </div>
 
-        <form method="post" enctype="multipart/form-data">
+     {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Nom</label>
-                <input type="text" class="form-control" value="{{ user.nom }}" disabled>
-            </div>
+<div class="mb-3">
+    <label class="form-label fw-bold">Nom</label>
+    <input type="text" class="form-control" value="{{ app.user.nom }}" disabled>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Email</label>
-                <input type="text" class="form-control" value="{{ user.email }}" disabled>
-            </div>
+<div class="mb-3">
+    <label class="form-label fw-bold">Email</label>
+    <input type="text" class="form-control" value="{{ app.user.email }}" disabled>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Photo de profil</label>
-                <input type="file"
-                       name="photoProfil"
-                       class="form-control"
-                       accept="image/*"
-                       required>
-            </div>
+<div class="mb-3">
+    {{ form_row(form.photoProfil) }}
+</div>
 
-            <button class="btn btn-primary w-100">
-                💾 Mettre à jour la photo
-            </button>
-        </form>
+<button class="btn btn-primary w-100">
+    💾 Mettre à jour la photo
+</button>
 
+{{ form_end(form) }}
     </div>
 
 </div>

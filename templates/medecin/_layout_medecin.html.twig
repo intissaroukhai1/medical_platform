@@ -1,0 +1,717 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Médecin - Dawini{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #0052A3;
+            --primary-light: #3B82F6;
+            --secondary: #00C9A7;
+            --secondary-dark: #00B896;
+            --accent: #FF6B6B;
+            --bg: #F0F4F8;
+            --surface: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(0, 102, 204, 0.08);
+            --shadow-md: 0 8px 24px rgba(0, 102, 204, 0.12);
+            --shadow-lg: 0 16px 40px rgba(0, 102, 204, 0.16);
+        }
+
+        body {
+            background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 50%, #EFF6FF 100%);
+            min-height: 100vh;
+        }
+
+        /* ============ SIDEBAR MODERNE ============ */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0066CC 0%, #0052A3 100%);
+            border-right: none;
+            padding: 2rem 0;
+            min-height: 100vh;
+            box-shadow: 4px 0 24px rgba(0, 102, 204, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem 2rem;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-logo::before {
+            content: "⚕️";
+            font-size: 2.5rem;
+            filter: drop-shadow(0 4px 8px rgba(255, 255, 255, 0.3));
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 1rem;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 1rem;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: white;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+
+        .sidebar-menu a::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+
+        .sidebar-menu a:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(4px);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-menu a:hover::before {
+            transform: translateX(0);
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-menu a.active::before {
+            transform: translateX(0);
+        }
+
+        /* ============ HEADER MODERNE ============ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.75rem 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #0066CC 0%, #00C9A7 100%);
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 102, 204, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .user-profile:hover {
+            background: rgba(0, 102, 204, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-avatar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 0.125rem 0 0 0;
+        }
+
+        /* ============ CARDS MODERNES ============ */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #0066CC 0%, #00C9A7 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 2px 8px rgba(0, 102, 204, 0.2));
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* ============ SECTIONS MODERNES ============ */
+        .calendar-section,
+        .appointments-section,
+        .patients-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        /* ============ BOUTONS MODERNES ============ */
+        .btn {
+            padding: 0.625rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #00C9A7 0%, #00B896 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 201, 167, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 201, 167, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #FF6B6B 0%, #E55555 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* ============ CALENDRIER ============ */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .calendar-nav button {
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+        }
+
+        .calendar-nav button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .day:hover {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(0, 201, 167, 0.1));
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .day.today {
+            background: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .day.has-appointment {
+            background: linear-gradient(135deg, #00C9A7 0%, #00B896 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* ============ APPOINTMENTS ============ */
+        .appointment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .appointment-item:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.02), rgba(0, 201, 167, 0.02));
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .appointment-info {
+            flex: 1;
+        }
+
+        .appointment-patient {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .appointment-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .appointment-reason {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* ============ PATIENTS ============ */
+        .patient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .patient-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .patient-row {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .patient-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .patient-info {
+            flex: 1;
+        }
+
+        .patient-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .patient-contact {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .appointment-item,
+            .patient-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .appointment-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block sidebar %}
+    <aside class="sidebar">
+        <div class="sidebar-logo">Dawini</div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ path('medecin_dashboard') }}" 
+                   class="{{ app.request.attributes.get('_route') == 'medecin_dashboard' ? 'active' : '' }}">
+                    📊 Aperçu
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('medecin_agenda') }}" 
+                   class="{{ app.request.attributes.get('_route') starts with 'medecin_agenda' ? 'active' : '' }}">
+                    📅 Mon Agenda
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('medecin_patients') }}" 
+                   class="{{ app.request.attributes.get('_route') starts with 'medecin_patients' ? 'active' : '' }}">
+                    👥 Mes Patients
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('medecin_ordonnances') }}" 
+                   class="{{ app.request.attributes.get('_route') starts with 'medecin_ordonnances' ? 'active' : '' }}">
+                    💊 Ordonnances
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('medecin_disponibilite') }}" 
+                   class="{{ app.request.attributes.get('_route') starts with 'medecin_disponibilite' ? 'active' : '' }}">
+                    ⏰ Disponibilité
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('user_profile') }}">
+                    👤 Mon Profil
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_logout') }}">
+                    🚪 Déconnexion
+                </a>
+            </li>
+        </ul>
+    </aside>
+{% endblock %}
+
+{% block content %}
+    {% block medecin_content %}
+        {# Le contenu des pages sera inséré ici #}
+    {% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function navigateTo(page) {
+            alert(`Navigation vers: ${page}`);
+        }
+
+        function previousMonth() {
+            alert('Mois précédent');
+        }
+
+        function nextMonth() {
+            alert('Mois suivant');
+        }
+    </script>
+{% endblock %}

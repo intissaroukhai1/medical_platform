@@ -1,0 +1,1011 @@
+{% extends 'medecin/_layout_medecin.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block medecin_content %}
+
+<style>
+/* ================= VARIABLES CSS MODERNES ================= */
+:root {
+    --gradient-primary: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+    --gradient-success: linear-gradient(135deg, #00C9A7 0%, #00B896 100%);
+    --gradient-danger: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    
+    --color-text-primary: #1a202c;
+    --color-text-secondary: #718096;
+    --color-border: #e2e8f0;
+    --color-bg-light: #f7fafc;
+    
+    --shadow-glass: 0 8px 32px rgba(0, 102, 204, 0.15);
+    --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.12);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-avatar: 0 10px 40px rgba(0, 102, 204, 0.4);
+    
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================= LAYOUT PLEINE LARGEUR ================= */
+.profil-full-width {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+/* ================= HEADER PROFIL ================= */
+.profil-header {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profil-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--gradient-primary);
+}
+
+.avatar-large {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid transparent;
+    background: var(--gradient-primary) padding-box, var(--gradient-primary) border-box;
+    box-shadow: var(--shadow-avatar);
+    transition: var(--transition-smooth);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-large:hover {
+    transform: scale(1.08) rotate(5deg);
+    box-shadow: 0 15px 50px rgba(0, 102, 204, 0.5);
+}
+
+.avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-initials {
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    font-weight: 800;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.profil-info {
+    flex: 1;
+}
+
+.profil-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.profil-role {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.profil-badges {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge-item {
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(0, 201, 167, 0.1) 100%);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0066CC;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ================= GRID LAYOUT ================= */
+.profil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* ================= FLASH MESSAGES ================= */
+.alert {
+    border-radius: var(--radius-md);
+    border: none;
+    padding: 1.25rem 1.75rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(0, 201, 167, 0.15) 0%, rgba(0, 184, 150, 0.15) 100%);
+    color: #0d9488;
+    border-left: 4px solid #00C9A7;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 111, 0.15) 100%);
+    color: #dc2626;
+    border-left: 4px solid #ff6b6b;
+}
+
+/* ================= SECTIONS CARDS ================= */
+.profil-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+}
+
+.profil-section:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-5px);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 28px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* ================= FORM ELEMENTS ================= */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.form-control,
+.form-select,
+textarea.form-control {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-smooth);
+    background: white;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.form-control:disabled {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea.form-control:focus {
+    outline: none;
+    border-color: #0066CC;
+    box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.15);
+    background: #fafbff;
+}
+
+.form-control:hover:not(:disabled),
+.form-select:hover {
+    border-color: #4facfe;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+/* ================= FILE INPUT MODERNE ================= */
+.file-upload-area {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.02) 0%, rgba(0, 201, 167, 0.02) 100%);
+    transition: var(--transition-smooth);
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #0066CC;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 201, 167, 0.05) 100%);
+}
+
+.file-upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.file-upload-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.file-upload-hint {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.form-control[type="file"] {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+/* ================= SPECIALITES GRID ================= */
+.specialites-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.specialite-item {
+    position: relative;
+}
+
+.form-check-input {
+    position: absolute;
+    opacity: 0;
+}
+
+.form-check-label {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-check-label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-primary);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.form-check-label:hover {
+    border-color: #0066CC;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 201, 167, 0.05) 100%);
+    transform: translateX(4px);
+}
+
+.form-check-input:checked + .form-check-label {
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(0, 201, 167, 0.1) 100%);
+    border-color: #0066CC;
+    color: #0066CC;
+}
+
+.form-check-input:checked + .form-check-label::before {
+    transform: scaleY(1);
+}
+
+.form-check-label::after {
+    content: '✓';
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked + .form-check-label::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ================= TOGGLE URGENCE ================= */
+.urgence-toggle-modern {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 142, 83, 0.05) 100%);
+    border: 2px solid rgba(255, 107, 107, 0.2);
+    border-radius: var(--radius-md);
+    transition: var(--transition-smooth);
+    margin-top: 1.5rem;
+}
+
+.urgence-toggle-modern:hover {
+    border-color: #FF6B6B;
+    transform: translateX(4px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+}
+
+.toggle-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.toggle-content {
+    flex: 1;
+}
+
+.toggle-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.toggle-description {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    flex-shrink: 0;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    transition: 0.4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #00C9A7 0%, #00B896 100%);
+}
+
+.toggle-input:focus + .toggle-slider {
+    box-shadow: 0 0 1px #00C9A7, inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* ================= INFO CARDS ================= */
+.info-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.02) 0%, rgba(0, 201, 167, 0.02) 100%);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.info-card:hover {
+    border-color: #0066CC;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 201, 167, 0.05) 100%);
+}
+
+.info-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-card .form-control {
+    border: none;
+    background: transparent;
+    padding: 0.5rem 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.info-card .form-control:focus {
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+/* ================= ADDRESS PREVIEW ================= */
+.address-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 201, 167, 0.05) 100%);
+    border-left: 4px solid #0066CC;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.address-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.address-text {
+    flex: 1;
+}
+
+.address-main {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.address-details {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.address-coords {
+    font-size: 0.85rem;
+    color: #0066CC;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    font-family: monospace;
+}
+
+/* ================= FORM ROW ================= */
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 1.5rem;
+}
+
+/* ================= COORDINATES SECTION ================= */
+.coordinates-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(0, 201, 167, 0.05) 0%, rgba(0, 184, 150, 0.05) 100%);
+    border: 2px dashed rgba(0, 201, 167, 0.3);
+    border-radius: var(--radius-md);
+}
+
+.coordinates-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.coordinates-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.btn-get-location {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #00C9A7 0%, #00B896 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 15px rgba(0, 201, 167, 0.3);
+}
+
+.btn-get-location:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 201, 167, 0.4);
+}
+
+.btn-get-location:active {
+    transform: translateY(0);
+}
+
+.coordinates-help {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-sm);
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* ================= BOUTON ENREGISTRER ================= */
+.btn-save {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1.25rem 2.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 10px 30px rgba(0, 102, 204, 0.4);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.btn-save::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-save:hover::before {
+    left: 100%;
+}
+
+.btn-save:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 102, 204, 0.5);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 992px) {
+    .profil-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profil-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .specialites-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .avatar-large {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .avatar-initials {
+        font-size: 48px;
+    }
+    
+    .profil-name {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<div class="profil-full-width">
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- HEADER PROFIL -->
+    <div class="profil-header">
+        <div class="avatar-large">
+            {% if app.user.photoProfil %}
+                <img src="{{ asset('uploads/photos/' ~ app.user.photoProfil) }}" alt="Photo de profil">
+            {% else %}
+                <div class="avatar-initials">
+                    {{ app.user.nom|slice(0,1)|upper }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="profil-info">
+            <h1 class="profil-name">Dr. {{ app.user.prenom }} {{ app.user.nom }}</h1>
+            <p class="profil-role">{{ app.user.specialite.nom ?? 'Médecin' }}</p>
+            <div class="profil-badges">
+                <span class="badge-item">📧 {{ app.user.email }}</span>
+                <span class="badge-item">📞 {{ app.user.telephone ?? 'Non renseigné' }}</span>
+                {% if app.user.disponibleUrgence %}
+                    <span class="badge-item" style="background: linear-gradient(135deg, rgba(0, 201, 167, 0.15), rgba(56, 239, 125, 0.15)); color: #00C9A7;">
+                        🚨 Disponible urgences
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+    <!-- GRID LAYOUT -->
+    <div class="profil-grid">
+        
+        <!-- COLONNE GAUCHE -->
+        <div>
+            <!-- Informations de base -->
+            <div class="profil-section" style="margin-bottom: 2rem;">
+                <h3 class="section-title">📋 Informations de base</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Nom</label>
+                    <input type="text" class="form-control" value="{{ app.user.nom }}" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Prénom</label>
+                    <input type="text" class="form-control" value="{{ app.user.prenom }}" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="text" class="form-control" value="{{ app.user.email }}" disabled>
+                </div>
+            </div>
+
+            <!-- Informations professionnelles -->
+            <div class="profil-section" style="margin-bottom: 2rem;">
+                <h3 class="section-title">⚕️ Informations professionnelles</h3>
+                
+                <div class="info-card">
+                    <div class="info-icon">🆔</div>
+                    <div class="info-content">
+                        <div class="info-label">Numéro d'ordre</div>
+                        {{ form_widget(form.numeroOrdre, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 5342'}}) }}
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">💰</div>
+                    <div class="info-content">
+                        <div class="info-label">Prix consultation</div>
+                        {{ form_widget(form.prixConsultation, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 80.00'}}) }}
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">📅</div>
+                    <div class="info-content">
+                        <div class="info-label">Années d'expérience</div>
+                        {{ form_widget(form.experienceAnnees, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 5'}}) }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">📝</span>
+                        Biographie
+                    </label>
+                    {{ form_widget(form.biographie, {'attr': {'class': 'form-control', 'placeholder': 'Parlez de votre parcours, vos compétences...', 'rows': 5}}) }}
+                </div>
+
+                <div class="urgence-toggle-modern">
+                    <div class="toggle-icon">🚨</div>
+                    <div class="toggle-content">
+                        <div class="toggle-title">Disponible pour les urgences</div>
+                        <div class="toggle-description">Activez cette option pour recevoir des demandes urgentes</div>
+                    </div>
+                    <label class="toggle-switch">
+                        {{ form_widget(form.disponibleUrgence, {'attr': {'class': 'toggle-input'}}) }}
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLONNE DROITE -->
+        <div>
+            <!-- Adresse cabinet -->
+            <div class="profil-section" style="margin-bottom: 2rem;">
+                <h3 class="section-title">🏥 Adresse du cabinet</h3>
+                
+                <div class="address-preview">
+                    <div class="address-icon">📍</div>
+                    <div class="address-text">
+                        <div class="address-main">{{ app.user.adresseCabinet ?: 'Adresse non renseignée' }}</div>
+                        <div class="address-details">{{ app.user.ville ?: 'Ville' }} • {{ app.user.codePostal ?: 'Code postal' }}</div>
+                        {% if app.user.latitude and app.user.longitude %}
+                            <div class="address-coords">🌍 {{ app.user.latitude }}, {{ app.user.longitude }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span style="font-size: 1.5rem; margin-right: 0.5rem;">🏢</span>
+                        Adresse du cabinet
+                    </label>
+                    {{ form_widget(form.adresseCabinet, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Clinique la Rose, Avenue Mohammed V'}}) }}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">
+                            <span style="font-size: 1.5rem; margin-right: 0.5rem;">🌆</span>
+                            Ville
+                        </label>
+                        {{ form_widget(form.ville, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Tunis'}}) }}
+                    </div>
+
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">
+                            <span style="font-size: 1.5rem; margin-right: 0.5rem;">📮</span>
+                            Code postal
+                        </label>
+                        {{ form_widget(form.codePostal, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 2080'}}) }}
+                    </div>
+                </div>
+
+                <div class="coordinates-section">
+                    <div class="coordinates-header">
+                        <h4 class="coordinates-title">🌍 Coordonnées GPS</h4>
+                        <button type="button" class="btn-get-location" onclick="getLocation()">
+                            📍 Obtenir ma position
+                        </button>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span style="font-size: 1.5rem; margin-right: 0.5rem;">🧭</span>
+                                Latitude
+                            </label>
+                            {{ form_widget(form.latitude, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 36.8065', 'id': 'latitude-input'}}) }}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span style="font-size: 1.5rem; margin-right: 0.5rem;">🧭</span>
+                                Longitude
+                            </label>
+                            {{ form_widget(form.longitude, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 10.1815', 'id': 'longitude-input'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="coordinates-help">
+                        <span style="font-size: 1.2rem; margin-right: 0.5rem;">💡</span>
+                        <span>Les coordonnées GPS permettent aux patients de localiser précisément votre cabinet sur une carte.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spécialités -->
+            <div class="profil-section" style="margin-bottom: 2rem;">
+                <h3 class="section-title">🩺 Spécialités</h3>
+                <div class="specialites-grid">
+                    {% for specialite in form.specialites %}
+                        <div class="specialite-item">
+                            {{ form_widget(specialite, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(specialite, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Photo de profil -->
+            <div class="profil-section">
+                <h3 class="section-title">📷 Photo de profil</h3>
+                <label for="{{ form.photoProfil.vars.id }}" class="file-upload-area">
+                    <div class="file-upload-icon">📸</div>
+                    <div class="file-upload-text">Cliquez pour choisir une photo</div>
+                    <div class="file-upload-hint">JPG, PNG ou GIF (Max 5Mo)</div>
+                </label>
+                {{ form_widget(form.photoProfil, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn-save">
+        💾 Enregistrer les modifications
+    </button>
+
+    {{ form_end(form) }}
+
+</div>
+
+<script>
+// Fonction pour obtenir la position GPS
+function getLocation() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    // Vérifier si la géolocalisation est supportée
+    if (!navigator.geolocation) {
+        alert('❌ La géolocalisation n\'est pas supportée par votre navigateur');
+        return;
+    }
+    
+    // Changer le texte du bouton
+    btn.innerHTML = '⏳ Localisation en cours...';
+    btn.disabled = true;
+    
+    // Obtenir la position
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            // Succès - remplir les champs
+            const latitude = position.coords.latitude.toFixed(6);
+            const longitude = position.coords.longitude.toFixed(6);
+            
+            document.getElementById('latitude-input').value = latitude;
+            document.getElementById('longitude-input').value = longitude;
+            
+            // Animation de succès
+            btn.innerHTML = '✅ Position obtenue !';
+            btn.style.background = 'linear-gradient(135deg, #00C9A7 0%, #38ef7d 100%)';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.style.background = '';
+            }, 2000);
+        },
+        function(error) {
+            // Erreur
+            let errorMsg = '❌ Erreur de géolocalisation';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg = '❌ Permission refusée. Autorisez la géolocalisation dans votre navigateur.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg = '❌ Position indisponible';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg = '❌ Délai d\'attente dépassé';
+                    break;
+            }
+            
+            alert(errorMsg);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+</script>
+
+{% endblock %}
