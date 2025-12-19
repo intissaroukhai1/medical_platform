@@ -49,8 +49,8 @@ class AuthController extends AbstractController
         // 🔥 2) Remplir les champs communs (User)
         // =============================================
         $entity->setEmail($data['email']);
-        $entity->setPrenom($data['firstName']);
-        $entity->setNom($data['lastName']);
+        $entity->setPrenom($data['prenom']);
+        $entity->setNom($data['nom']);
         $entity->setRoles(["ROLE_" . $role]);
 
         $hashed = $passwordHasher->hashPassword($entity, $data['password']);
@@ -80,10 +80,26 @@ class AuthController extends AbstractController
             $entity->setBiographie($data['biographie']);
         }
 
-        if ($entity instanceof Secretaire) {
-            $entity->setTypeContrat($data['typeContrat']);
-        }
+if ($entity instanceof Secretaire) {
 
+   $medecinId = $data['medecinId'] ?? null;
+
+if (!$medecinId) {
+    return new JsonResponse(['message' => 'medecinId manquant'], 400);
+}
+
+$medecin = $em->getRepository(Medecin::class)->find($medecinId);
+if (!$medecin) {
+    return new JsonResponse(['message' => 'Médecin introuvable'], 404);
+}
+
+
+    $entity->setMedecin($medecin);
+
+    // Champs facultatifs / sécurisés
+    $entity->setTypeContrat($data['typeContrat'] ?? null);
+    $entity->setMotifContrat($data['motifContrat'] ?? null);
+}
         if ($entity instanceof Admin) {
             $entity->setAccesTotal($data['accesTotal'] ?? false);
         }

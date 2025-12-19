@@ -6,7 +6,7 @@ use App\Repository\MedecinRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-
+use App\Entity\Secretaire;
 #[ORM\Entity(repositoryClass: MedecinRepository::class)]
 #[ORM\Table(name: "medecins")]
 class Medecin extends User
@@ -17,11 +17,12 @@ class Medecin extends User
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $adresseCabinet = null;
 
-    #[ORM\Column(type: 'float')]
-    private ?float $latitude = null;
+    
+   #[ORM\Column(type: 'float', nullable: true)]
+private ?float $latitude = null;
 
-    #[ORM\Column(type: 'float')]
-    private ?float $longitude = null;
+#[ORM\Column(type: 'float', nullable: true)]
+private ?float $longitude = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $ville = null;
@@ -43,23 +44,31 @@ class Medecin extends User
 
     // ---------- Relations ----------
 
-    #[ORM\ManyToOne(targetEntity: Specialite::class, inversedBy: 'medecins')]
-    private ?Specialite $specialite = null;
+    
+#[ORM\ManyToMany(targetEntity: Specialite::class, inversedBy: 'medecins')]
+#[ORM\JoinTable(name: 'medecin_specialite')]
+private Collection $specialites;
 
     #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: Disponibilite::class, cascade: ['persist', 'remove'])]
     private Collection $disponibilites;
 
     #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: RendezVous::class)]
     private Collection $rendezVous;
+    #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: MedecinAbonnement::class)]
+private Collection $abonnements;
 
-    #[ORM\ManyToOne(targetEntity: Abonnement::class, inversedBy: 'medecins')]
-    private ?Abonnement $abonnement = null;
+    #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: Secretaire::class)]
+    private Collection $secretaires;
 
     public function __construct()
     {
         parent::__construct();
         $this->disponibilites = new ArrayCollection();
         $this->rendezVous = new ArrayCollection();
+        $this->secretaires = new ArrayCollection();
+        $this->specialites = new ArrayCollection();
+        $this->abonnements = new ArrayCollection();
+
 
         // Rôle par défaut d'un médecin
         $this->setRoles(['ROLE_MEDECIN']);
@@ -94,18 +103,21 @@ class Medecin extends User
         return $this->latitude;
     }
 
-    public function setLatitude(float $latitude): self
+    public function setLatitude(?float $latitude): self
     {
         $this->latitude = $latitude;
         return $this;
     }
+
+
+
 
     public function getLongitude(): ?float
     {
         return $this->longitude;
     }
 
-    public function setLongitude(float $longitude): self
+    public function setLongitude(?float $longitude): self
     {
         $this->longitude = $longitude;
         return $this;
@@ -179,16 +191,30 @@ class Medecin extends User
 
     // ---------- Relations ----------
 
-    public function getSpecialite(): ?Specialite
-    {
-        return $this->specialite;
-    }
+   /**
+ * @return Collection<int, Specialite>
+ */
+public function getSpecialites(): Collection
+{
+    return $this->specialites;
+}
 
-    public function setSpecialite(?Specialite $specialite): self
-    {
-        $this->specialite = $specialite;
-        return $this;
+public function addSpecialite(Specialite $specialite): self
+{
+    if (!$this->specialites->contains($specialite)) {
+        $this->specialites->add($specialite);
+        $specialite->addMedecin($this); // sync inverse
     }
+    return $this;
+}
+
+public function removeSpecialite(Specialite $specialite): self
+{
+    if ($this->specialites->removeElement($specialite)) {
+        $specialite->removeMedecin($this); // sync inverse
+    }
+    return $this;
+}
 
     /**
      * @return Collection<int, Disponibilite>
@@ -244,14 +270,48 @@ class Medecin extends User
         return $this;
     }
 
-    public function getAbonnement(): ?Abonnement
-    {
-        return $this->abonnement;
-    }
 
-    public function setAbonnement(?Abonnement $abonnement): self
-    {
-        $this->abonnement = $abonnement;
-        return $this;
+
+
+    /**
+ * @return Collection<int, Secretaire>
+ */
+public function getSecretaires(): Collection
+{
+    return $this->secretaires;
+}
+
+public function addSecretaire(Secretaire $secretaire): self
+{
+    if (!$this->secretaires->contains($secretaire)) {
+        $this->secretaires[] = $secretaire;
+        $secretaire->setMedecin($this); // relation inverse
     }
+    return $this;
+}
+
+public function removeSecretaire(Secretaire $secretaire): self
+{
+    if ($this->secretaires->removeElement($secretaire)) {
+        if ($secretaire->getMedecin() === $this) {
+            $secretaire->setMedecin(null);
+        }
+    }
+    return $this;
+}
+public function getActiveAbonnement(): ?MedecinAbonnement
+{
+    foreach ($this->abonnements as $abonnement) {
+        if ($abonnement->isActif()) {
+            return $abonnement;
+        }
+    }
+    return null;
+}
+public function getAbonnements(): Collection
+{
+    return $this->abonnements;
+}
+
+
 }

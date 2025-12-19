@@ -1,0 +1,617 @@
+{% extends 'admin/_layout_admin.html.twig' %}
+
+{% block admin_content %}
+<style>
+    .user-management {
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .content-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    .btn-new {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .table-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+
+    .table-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .users-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .users-table thead th {
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: white;
+    }
+
+    .users-table thead th:first-child {
+        border-radius: 12px 0 0 0;
+    }
+
+    .users-table thead th:last-child {
+        border-radius: 0 12px 0 0;
+    }
+
+    .users-table tbody tr {
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .users-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .users-table tbody td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #4a5568;
+        font-size: 0.95rem;
+    }
+
+    .users-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .user-email {
+        color: #718096;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .btn-action {
+        padding: 0.625rem 1.25rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.5);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .user-management {
+            padding: 1rem;
+        }
+
+        .header-section {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+        }
+
+        .table-container {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .users-table {
+            min-width: 800px;
+        }
+    }
+/* ============ MODAL MODERNE ============ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 550px;
+    max-height: 85vh; /* Réduit pour forcer le scroll */
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+/* Scrollbar moderne */
+.modal-card::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-card::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 0 24px 24px 0;
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    border: 2px solid #f5f7fa;
+}
+
+.modal-card::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #5568d3 0%, #6a3f8a 100%);
+}
+
+.modal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px 24px 0 0;
+    z-index: 1;
+}
+
+.modal-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-top: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2d3748;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    font-family: inherit;
+    background: #f5f7fa;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #718096;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.btn-cancel {
+    background: #f5f7fa;
+    color: #2d3748;
+    border: 2px solid #e2e8f0;
+    box-shadow: none;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .modal-card {
+        margin: 1rem;
+        padding: 1.5rem;
+        max-width: calc(100% - 2rem);
+        max-height: 80vh;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .modal-actions .btn {
+        width: 100%;
+    }
+}
+
+</style>
+
+<div class="user-management">
+    <div class="content-wrapper">
+        <div class="header-section">
+            <h1 class="page-title">Gestion des Utilisateurs</h1>
+           <button type="button" class="btn-new" id="openUserModal">
+
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Nouveau
+            </a>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">Liste des utilisateurs</div>
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in utilisateurs %}
+                    <tr>
+                        <td>
+                            <div class="user-name">
+                                <div class="user-avatar">{{ user.nom|slice(0, 1)|upper }}</div>
+                                {{ user.nom }}
+                            </div>
+                        </td>
+                        <td class="user-email">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            {{ user.email }}
+                        </td>
+                        <td>
+                            <span class="role-badge">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                {{ user.roles[0] }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                          <a href="#"
+   class="btn-action btn-edit"
+   onclick="openEditModal(
+       {{ user.id }},
+       '{{ user.nom|e('js') }}',
+       '{{ user.prenom|e('js') }}',
+       '{{ user.email|e('js') }}',
+       '{{ user.telephone|e('js') }}',
+       '{{ user.roles[0]|e('js') }}'
+   )">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+    Éditer
+</a>
+                                <form method="POST"
+      action="{{ path('admin_utilisateur_delete', { id: user.id }) }}"
+      style="display:inline;"
+      onsubmit="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+
+    <input type="hidden" name="_token"
+           value="{{ csrf_token('utilisateur-delete' ~ user.id) }}">
+
+    <button type="submit" class="btn-action btn-delete">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Supprimer
+    </button>
+</form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <!-- MODAL AJOUT UTILISATEUR -->
+<div id="userModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h2 class="modal-title">Ajouter un utilisateur</h2>
+
+      <form method="POST" action="{{ path('admin_utilisateur_create') }}">
+ <input type="hidden" name="_token" id="csrf_token"
+       value="{{ csrf_token('utilisateur-create') }}">
+
+    <div class="form-group">
+        <label>Nom</label>
+        <input type="text" id="nom" name="nom" required>
+    </div>
+
+    <div class="form-group">
+        <label>Prénom</label>
+        <input type="text" id="prenom" name="prenom" required>
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+        <label>Téléphone</label>
+        <input type="text" id="telephone" name="telephone">
+    </div>
+
+    <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="password" name="password">
+    </div>
+
+    <div class="form-group">
+        <label>Rôle</label>
+        <select id="role" name="role" required>
+            <option value="ROLE_PATIENT">Patient</option>
+            <option value="ROLE_MEDECIN">Médecin</option>
+            <option value="ROLE_SECRETAIRE">Secrétaire</option>
+            <option value="ROLE_ADMIN">Admin</option>
+        </select>
+    </div>
+
+  
+
+
+            <div class="modal-actions">
+                <button type="button" id="closeUserModal" class="btn btn-secondary">
+                    Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const modal    = document.getElementById('userModal');
+    const openBtn  = document.getElementById('openUserModal');
+    const closeBtn = document.getElementById('closeUserModal');
+    const form     = modal.querySelector('form');
+    const csrf     = document.getElementById('csrf_token');
+
+    /* ========= CREATE ========= */
+    openBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        form.reset();
+        form.action = "{{ path('admin_utilisateur_create') }}";
+        csrf.value  = "{{ csrf_token('utilisateur-create') }}";
+        modal.classList.remove('hidden');
+    });
+
+    /* ========= EDIT ========= */
+    window.openEditModal = function (id, nom, prenom, email, telephone, role) {
+
+        document.getElementById('nom').value       = nom;
+        document.getElementById('prenom').value    = prenom;
+        document.getElementById('email').value     = email;
+        document.getElementById('telephone').value = telephone || '';
+        document.getElementById('role').value      = role;
+
+        form.action = `/admin/utilisateurs/${id}/update`;
+        csrf.value  = "{{ csrf_token('utilisateur-edit') }}";
+
+        modal.classList.remove('hidden');
+    };
+
+    /* ========= CLOSE ========= */
+    closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+    });
+});
+</script>
+
+
+
+
+
+{% endblock %}

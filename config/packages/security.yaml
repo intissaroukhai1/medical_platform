@@ -10,26 +10,22 @@ security:
                 property: email
 
     firewalls:
-        # AREA DEV
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # PUBLIC API : register + login
         public_api:
             pattern: ^/api/auth
             stateless: true
             security: false
 
-        # PROTECTED API (JWT)
         api:
-            pattern: ^/api
-            stateless: true
-            provider: app_user_provider
-            custom_authenticators:
-                - App\Security\JWTAuthenticator
+           pattern: ^/api
+           stateless: true
+           provider: app_user_provider
+           custom_authenticators:
+               - App\Security\JWTAuthenticator
 
-        # FRONTEND SESSION LOGIN
         main:
             lazy: true
             provider: app_user_provider
@@ -38,12 +34,15 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
+                success_handler: App\Security\LoginSuccessHandler   # 👈 OBLIGATOIRE
 
             logout:
                 path: app_logout
                 target: /login
 
     access_control:
+    
+        - { path: ^/api/medecins, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
@@ -51,3 +50,18 @@ security:
 
         # Protected API
         - { path: ^/api, roles: ROLE_USER }
+
+        # Médecin (doit être connecté + avoir rôle)
+       
+        - { path: ^/medecin, roles: [ROLE_MEDECIN, ROLE_ADMIN] }
+
+        # Patient
+        - { path: ^/patient, roles: ROLE_PATIENT }
+    # Admin
+        - { path: ^/admin, roles: ROLE_ADMIN }
+           # Secrétaire
+        - { path: ^/secretaire, roles: ROLE_SECRETAIRE }
+        
+        - { path: ^/specialites, roles: [ROLE_ADMIN, ROLE_MEDECIN] }
+        - { path: ^/abonnements, roles: ROLE_ADMIN }
+        - { path: ^/medecin, roles: ROLE_ADMIN }

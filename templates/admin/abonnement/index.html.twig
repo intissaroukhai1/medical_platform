@@ -1,0 +1,798 @@
+{% extends 'admin/_layout_admin.html.twig' %}
+
+{% block title %}Abonnements{% endblock %}
+
+{% block admin_content %}
+
+<style>
+/* ================= VARIABLES CSS MODERNES ================= */
+:root {
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    
+    --color-text-primary: #1a202c;
+    --color-text-secondary: #718096;
+    --color-border: #e2e8f0;
+    --color-bg-light: #f7fafc;
+    
+    --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
+    --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.12);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+    
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================= RESET & BASE ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+/* ================= SECTION PRINCIPALE ================= */
+.table-section {
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass);
+    margin: 2rem;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================= HEADER SECTION ================= */
+.section-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 3px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                var(--gradient-primary) border-box;
+    border-image-slice: 1;
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100px;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 10px;
+    animation: slideRight 0.8s ease-out;
+}
+
+@keyframes slideRight {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100px;
+    }
+}
+
+.section-header h2 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.section-header .text-muted {
+    font-size: 1.05rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+/* ================= BOUTON PRINCIPAL GLASSMORPHISM ================= */
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+/* ================= CARTES ABONNEMENTS MODERNES ================= */
+.row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.specialty-card {
+    background: var(--gradient-card);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    transition: var(--transition-smooth);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+.specialty-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.specialty-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.specialty-card:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-8px) scale(1.02);
+}
+
+.specialty-card:hover::before {
+    transform: scaleX(1);
+}
+
+.specialty-card:hover::after {
+    opacity: 1;
+}
+
+.specialty-card h5 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.5px;
+}
+
+.specialty-card .text-muted {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.9;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+}
+
+/* ================= BADGES MODERNES ================= */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.badge:hover::before {
+    left: 100%;
+}
+
+.badge.bg-success {
+    background: var(--gradient-success);
+    color: white;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(135deg, #a8b2d1 0%, #667eea 100%);
+    color: white;
+}
+
+/* ================= ACTIONS DES CARTES ================= */
+.card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 1;
+}
+
+.btn-edit, .btn-delete {
+    padding: 0.875rem 1.25rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-edit::before,
+.btn-delete::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn-edit:hover::before,
+.btn-delete:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-edit {
+    background: var(--gradient-warning);
+    color: white;
+    box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
+}
+
+.btn-edit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(245, 87, 108, 0.4);
+}
+
+.btn-delete {
+    background: var(--gradient-info);
+    color: white;
+    box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+}
+
+.btn-delete:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(79, 172, 254, 0.4);
+}
+
+/* ================= ALERT MODERNE ================= */
+.alert-info {
+    background: rgba(79, 172, 254, 0.1);
+    border: 2px solid rgba(79, 172, 254, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.15);
+}
+
+/* ================= MODAL GLASSMORPHISM ================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-custom {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    max-width: 650px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8) translateY(50px);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.modal-overlay.active .modal-custom {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header-custom {
+    padding: 2rem 2.5rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+}
+
+.modal-title-custom {
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.modal-close {
+    background: rgba(239, 68, 68, 0.1);
+    border: none;
+    font-size: 1.75rem;
+    color: #ef4444;
+    cursor: pointer;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-smooth);
+    font-weight: 300;
+}
+
+.modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.modal-body-custom {
+    padding: 2.5rem;
+}
+
+.modal-body-custom .mb-3 {
+    margin-bottom: 1.75rem;
+}
+
+.modal-body-custom label {
+    display: block;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+}
+
+.modal-body-custom .form-control {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition-smooth);
+    background: white;
+    font-weight: 500;
+}
+
+.modal-body-custom .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: #fafbff;
+}
+
+.modal-body-custom textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.modal-body-custom input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    margin-right: 0.75rem;
+    accent-color: #667eea;
+}
+
+.modal-footer-custom {
+    padding: 1.75rem 2.5rem;
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.25rem;
+    background: linear-gradient(0deg, rgba(102, 126, 234, 0.03) 0%, transparent 100%);
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--color-text-secondary);
+    padding: 1rem 2rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-light);
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.btn-submit {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-submit:hover::before {
+    left: 100%;
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+}
+
+/* ================= SCROLLBAR PERSONNALISÉE ================= */
+.modal-custom::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-custom::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.modal-custom::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .table-section {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1.5rem;
+    }
+    
+    .section-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .btn-primary {
+        width: 100%;
+    }
+    
+    .row {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-custom {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modal-header-custom,
+    .modal-body-custom,
+    .modal-footer-custom {
+        padding: 1.5rem;
+    }
+    
+    .modal-title-custom {
+        font-size: 1.5rem;
+    }
+}
+
+/* ================= ANIMATIONS SUPPLÉMENTAIRES ================= */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.specialty-card:hover h5 {
+    animation: pulse 2s infinite;
+}
+</style>
+
+<div class="table-section">
+    <div class="section-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2>📦 Abonnements</h2>
+            <p class="text-muted">Gestion des plans d'abonnement</p>
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <button type="button" class="btn-primary" id="openAbonnementModal">
+                ➕ Ajouter abonnement
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% for a in abonnements %}
+            <div class="col-md-4 mb-3">
+                <div class="specialty-card">
+                    <div>
+                        <h5>{{ a.nom }}</h5>
+
+                        <p class="text-muted">
+                            💰 {{ a.prix }} € / mois<br>
+                            👩‍💼 Secrétaires : {{ a.nbSecretairesAutorises }}<br>
+                            📌 Statut :
+                            {% if a.actif %}
+                                <span class="badge bg-success">Actif</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactif</span>
+                            {% endif %}
+                        </p>
+
+                        <p class="text-muted mt-2">
+                            {{ a.description ?: 'Aucune description' }}
+                        </p>
+                    </div>
+
+                    <div class="card-actions">
+                        <button
+                            type="button"
+                            class="btn-edit"
+                            data-id="{{ a.id }}"
+                            data-nom="{{ a.nom }}"
+                            data-prix="{{ a.prix }}"
+                            data-nb="{{ a.nbSecretairesAutorises }}"
+                            data-description="{{ a.description}}"
+                        >
+                            ✏️ Modifier
+                        </button>
+
+                        <a href="{{ path('abonnement_toggle', {id: a.id}) }}"
+                           class="btn-delete">
+                            🔄 Toggle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    Aucun abonnement créé
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{# ================= MODAL ABONNEMENT ================= #}
+<div class="modal-overlay" id="abonnementModal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-custom">
+        <div class="modal-header-custom">
+            <h5 class="modal-title-custom" id="modalTitle">
+                ➕ Ajouter un abonnement
+            </h5>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+
+        {{ form_start(form, {
+            action: path('abonnement_index'),
+            method: 'POST',
+            attr: { id: 'abonnementForm' }
+        }) }}
+
+        <div class="modal-body-custom">
+
+            <div class="mb-3">
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.prix) }}
+                {{ form_widget(form.prix, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.nbSecretairesAutorises) }}
+                {{ form_widget(form.nbSecretairesAutorises, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {
+                    'attr': {'class': 'form-control', 'rows': 4}
+                }) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_widget(form.actif) }}
+                {{ form_label(form.actif) }}
+            </div>
+        </div>
+
+        <div class="modal-footer-custom">
+            <button type="button" class="btn-secondary" onclick="closeModal()">
+                Annuler
+            </button>
+            <button type="submit" class="btn-submit">
+                Enregistrer
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{# ================= JS IDENTIQUE À SPÉCIALITÉS ================= #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const modal = document.getElementById('abonnementModal');
+    const form = document.getElementById('abonnementForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const openBtn = document.getElementById('openAbonnementModal');
+
+    openBtn?.addEventListener('click', () => {
+        form.reset();
+        form.action = '{{ path("abonnement_index") }}';
+        modalTitle.innerText = '➕ Ajouter un abonnement';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+
+            document.getElementById('{{ form.nom.vars.id }}').value = btn.dataset.nom;
+            document.getElementById('{{ form.prix.vars.id }}').value = btn.dataset.prix;
+            document.getElementById('{{ form.nbSecretairesAutorises.vars.id }}').value = btn.dataset.nb;
+            document.getElementById('{{ form.description.vars.id }}').value = btn.dataset.description;
+
+           form.action = '{{ path("abonnement_edit", {id: "__ID__"}) }}'
+    .replace('__ID__', btn.dataset.id);
+            modalTitle.innerText = '✏️ Modifier abonnement';
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    window.closeModal = function () {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    };
+
+    window.closeModalOnOverlay = function (e) {
+        if (e.target === modal) closeModal();
+    };
+});
+</script>
+
+{% endblock %}

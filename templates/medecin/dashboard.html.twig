@@ -1,70 +1,750 @@
-{% extends "base.html.twig" %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Médecin - Dawini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block title %}Dashboard Médecin - Dawini{% endblock %}
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #0052A3;
+            --secondary: #00C9A7;
+            --accent: #FF6B6B;
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --radius: 12px;
+        }
 
-{% block navbar %}
-<nav class="navbar">
-    <div style="font-weight: 700; color: var(--primary);">🏥 DAWINI - Médecin</div>
-    <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <span>Dr. {{ app.user.nom }}</span>
-        <button onclick="alert('Déconnexion')" class="nav-item">Déconnexion</button>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: var(--bg);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        .sidebar-menu a.active {
+            background-color: var(--bg);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+            padding-left: calc(1.5rem - 3px);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Appointments Calendar */
+        .calendar-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .calendar-nav button {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .calendar-nav button:hover {
+            background: var(--primary-dark);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .day:hover {
+            background: var(--bg);
+            border-color: var(--primary);
+        }
+
+        .day.today {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .day.has-appointment {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        /* Appointments List */
+        .appointments-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .appointment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) / 2);
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .appointment-item:hover {
+            border-color: var(--primary);
+            background-color: rgba(0, 102, 204, 0.02);
+        }
+
+        .appointment-info {
+            flex: 1;
+        }
+
+        .appointment-patient {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .appointment-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .appointment-reason {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #00B896;
+        }
+
+        .btn-danger {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #E55555;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Patients List */
+        .patients-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+        }
+
+        .patient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) / 2);
+            margin-bottom: 1rem;
+        }
+
+        .patient-info {
+            flex: 1;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .patient-contact {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .patient-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .patient-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .weekdays, .days {
+                grid-template-columns: repeat(7, 1fr);
+                font-size: 0.8rem;
+            }
+
+            .appointment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .appointment-actions {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">Dawini</div>
+            <ul class="sidebar-menu">
+                <li><a class="active" onclick="navigateTo('overview')">📊 Aperçu</a></li>
+                <li><a onclick="navigateTo('agenda')">📅 Mon Agenda</a></li>
+                <li><a onclick="navigateTo('patients')">👥 Mes Patients</a></li>
+                <li><a onclick="navigateTo('ordonnances')">💊 Ordonnances</a></li>
+                <li><a onclick="navigateTo('disponibilite')">⏰ Disponibilité</a></li>
+                <li><a onclick="navigateTo('profil')">👤 Mon Profil</a></li>
+                <li><a href="{{ path('app_logout') }}">🚪 Déconnexion</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+           <div class="header">
+    <h1>Dashboard Médecin</h1>
+
+    <div class="user-profile">
+
+        <div class="user-info">
+            <div class="user-name">
+                Dr. {{ medecin.prenom }} {{ medecin.nom }}
+            </div>
+            <div class="user-role">
+                {{ medecin.specialite ?? 'Médecin' }}
+            </div>
+        </div>
+
+        <div class="user-avatar">
+            {{ medecin.prenom|first|upper }}{{ medecin.nom|first|upper }}
+        </div>
+
+    </div> <!-- 🔥 FERMETURE DE user-profile -->
+
+</div> <!-- 🔥 FERMETURE DE header -->
+
+
+            <!-- Stats Cards -->
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">RDV Aujourd'hui</div>
+                        <div class="card-icon">📅</div>
+                    </div>
+                    <div class="card-value">5</div>
+                    <div class="card-description">Consultations prévues</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Patients</div>
+                        <div class="card-icon">👥</div>
+                    </div>
+                    <div class="card-value">142</div>
+                    <div class="card-description">Sous suivi</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Ordonnances</div>
+                        <div class="card-icon">💊</div>
+                    </div>
+                    <div class="card-value">28</div>
+                    <div class="card-description">Ce mois</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Taux de satisfaction</div>
+                        <div class="card-icon">⭐</div>
+                    </div>
+                    <div class="card-value">4.8</div>
+                    <div class="card-description">/ 5 étoiles</div>
+                </div>
+            </div>
+
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <h2 class="section-title">Calendrier - Décembre 2024</h2>
+                    <div class="calendar-nav">
+                        <button onclick="previousMonth()">&lt;</button>
+                        <button onclick="nextMonth()">&gt;</button>
+                    </div>
+                </div>
+
+                <div class="weekdays">
+                    <div class="weekday">Lun</div>
+                    <div class="weekday">Mar</div>
+                    <div class="weekday">Mer</div>
+                    <div class="weekday">Jeu</div>
+                    <div class="weekday">Ven</div>
+                    <div class="weekday">Sam</div>
+                    <div class="weekday">Dim</div>
+                </div>
+
+                <div class="days">
+                    <div class="day">25</div>
+                    <div class="day">26</div>
+                    <div class="day">27</div>
+                    <div class="day">28</div>
+                    <div class="day">29</div>
+                    <div class="day">30</div>
+                    <div class="day">1</div>
+                    <div class="day">2</div>
+                    <div class="day">3</div>
+                    <div class="day today has-appointment">4</div>
+                    <div class="day has-appointment">5</div>
+                    <div class="day">6</div>
+                    <div class="day">7</div>
+                    <div class="day">8</div>
+                    <div class="day">9</div>
+                    <div class="day">10</div>
+                    <div class="day">11</div>
+                    <div class="day">12</div>
+                    <div class="day has-appointment">13</div>
+                    <div class="day">14</div>
+                    <div class="day">15</div>
+                    <div class="day">16</div>
+                    <div class="day">17</div>
+                    <div class="day">18</div>
+                    <div class="day">19</div>
+                    <div class="day">20</div>
+                    <div class="day">21</div>
+                    <div class="day">22</div>
+                    <div class="day">23</div>
+                    <div class="day">24</div>
+                    <div class="day">25</div>
+                </div>
+            </div>
+
+            <!-- Appointments -->
+            <div class="appointments-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="section-title">Consultations d'Aujourd'hui</h2>
+                    <button class="btn btn-primary" onclick="alert('Ajouter une consultation')">+ Ajouter</button>
+                </div>
+
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <div class="appointment-patient">Youssef Bouhmala</div>
+                        <div class="appointment-time">⏰ 09:00 - 09:30</div>
+                        <div class="appointment-reason">Contrôle cardiaque</div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-small" onclick="alert('Consulter patient')">Consulter</button>
+                        <button class="btn btn-secondary btn-small" onclick="alert('Écrire ordonnance')">Ordonnance</button>
+                        <button class="btn btn-danger btn-small" onclick="alert('Annuler')">Annuler</button>
+                    </div>
+                </div>
+
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <div class="appointment-patient">Mariam Saidi</div>
+                        <div class="appointment-time">⏰ 10:00 - 10:30</div>
+                        <div class="appointment-reason">Consultation de suivi</div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-small" onclick="alert('Consulter patient')">Consulter</button>
+                        <button class="btn btn-secondary btn-small" onclick="alert('Écrire ordonnance')">Ordonnance</button>
+                        <button class="btn btn-danger btn-small" onclick="alert('Annuler')">Annuler</button>
+                    </div>
+                </div>
+
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <div class="appointment-patient">Hassan Khouibi</div>
+                        <div class="appointment-time">⏰ 11:00 - 11:30</div>
+                        <div class="appointment-reason">Consultation générale</div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-small" onclick="alert('Consulter patient')">Consulter</button>
+                        <button class="btn btn-secondary btn-small" onclick="alert('Écrire ordonnance')">Ordonnance</button>
+                        <button class="btn btn-danger btn-small" onclick="alert('Annuler')">Annuler</button>
+                    </div>
+                </div>
+
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <div class="appointment-patient">Fatima El Mounia</div>
+                        <div class="appointment-time">⏰ 14:00 - 14:30</div>
+                        <div class="appointment-reason">Bilan de santé annuel</div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-small" onclick="alert('Consulter patient')">Consulter</button>
+                        <button class="btn btn-secondary btn-small" onclick="alert('Écrire ordonnance')">Ordonnance</button>
+                        <button class="btn btn-danger btn-small" onclick="alert('Annuler')">Annuler</button>
+                    </div>
+                </div>
+
+                <div class="appointment-item">
+                    <div class="appointment-info">
+                        <div class="appointment-patient">Karim Bennani</div>
+                        <div class="appointment-time">⏰ 15:30 - 16:00</div>
+                        <div class="appointment-reason">Consultation urgente</div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-small" onclick="alert('Consulter patient')">Consulter</button>
+                        <button class="btn btn-secondary btn-small" onclick="alert('Écrire ordonnance')">Ordonnance</button>
+                        <button class="btn btn-danger btn-small" onclick="alert('Annuler')">Annuler</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patients List -->
+            <div class="patients-section">
+                <h2 class="section-title">Mes Patients Récents</h2>
+
+                <div class="patient-item">
+                    <div class="patient-row">
+                        <div class="patient-avatar">YB</div>
+                        <div class="patient-info">
+                            <div class="patient-name">Youssef Bouhmala</div>
+                            <div class="patient-contact">📧 youssef@email.com | 📞 +212 6 12 34 56 78</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="alert('Voir dossier')">Voir Dossier</button>
+                </div>
+
+                <div class="patient-item">
+                    <div class="patient-row">
+                        <div class="patient-avatar">MS</div>
+                        <div class="patient-info">
+                            <div class="patient-name">Mariam Saidi</div>
+                            <div class="patient-contact">📧 mariam@email.com | 📞 +212 6 23 45 67 89</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="alert('Voir dossier')">Voir Dossier</button>
+                </div>
+
+                <div class="patient-item">
+                    <div class="patient-row">
+                        <div class="patient-avatar">HK</div>
+                        <div class="patient-info">
+                            <div class="patient-name">Hassan Khouibi</div>
+                            <div class="patient-contact">📧 hassan@email.com | 📞 +212 6 34 56 78 90</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="alert('Voir dossier')">Voir Dossier</button>
+                </div>
+
+                <div class="patient-item">
+                    <div class="patient-row">
+                        <div class="patient-avatar">FEM</div>
+                        <div class="patient-info">
+                            <div class="patient-name">Fatima El Mounia</div>
+                            <div class="patient-contact">📧 fatima@email.com | 📞 +212 6 45 67 89 01</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="alert('Voir dossier')">Voir Dossier</button>
+                </div>
+            </div>
+        </main>
     </div>
-</nav>
-{% endblock %}
 
-{% block sidebar %}
-<div class="sidebar" style="width: 250px;">
-    <h3 style="font-weight: 700; margin-bottom: 1.5rem;">Menu</h3>
-    <a href="#" class="nav-item active" style="display: block; margin-bottom: 0.5rem;">📅 Agenda</a>
-    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">📋 Mes Patients</a>
-    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">💊 Ordonnances</a>
-    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">⏰ Disponibilités</a>
-    <a href="#" class="nav-item" style="display: block; margin-bottom: 0.5rem;">⚙️ Paramètres</a>
-</div>
-{% endblock %}
+    <script>
+        function navigateTo(page) {
+            alert(`Navigation vers: ${page}`);
+        }
 
-{% block content %}
-<h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">Mon Dashboard</h1>
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
+                window.location.href = 'index.html';
+            }
+        }
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-    <div class="card">
-        <div style="color: var(--primary); font-size: 2rem;">👥</div>
-        <p style="color: #6B7280; margin-top: 0.5rem;">Patients</p>
-        <h3 style="font-size: 2rem; font-weight: 700;">{{ medecin.patients | length }}</h3>
-    </div>
-    <div class="card">
-        <div style="color: var(--secondary); font-size: 2rem;">📅</div>
-        <p style="color: #6B7280; margin-top: 0.5rem;">RDV Aujourd'hui</p>
-        <h3 style="font-size: 2rem; font-weight: 700;">{{ rdv_today | length }}</h3>
-    </div>
-    <div class="card">
-        <div style="color: var(--success); font-size: 2rem;">✓</div>
-        <p style="color: #6B7280; margin-top: 0.5rem;">Consultations</p>
-        <h3 style="font-size: 2rem; font-weight: 700;">{{ medecin.consultations | length }}</h3>
-    </div>
-</div>
+        function previousMonth() {
+            alert('Mois précédent');
+        }
 
-<div class="card">
-    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Rendez-vous d'Aujourd'hui</h2>
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="border-bottom: 2px solid var(--border);">
-                <th style="text-align: left; padding: 1rem; font-weight: 600;">Heure</th>
-                <th style="text-align: left; padding: 1rem; font-weight: 600;">Patient</th>
-                <th style="text-align: left; padding: 1rem; font-weight: 600;">Motif</th>
-                <th style="text-align: left; padding: 1rem; font-weight: 600;">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for rdv in rdv_today %}
-            <tr style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 1rem;">{{ rdv.heureDebut | date('H:i') }}</td>
-                <td style="padding: 1rem;">{{ rdv.patient.nom }}</td>
-                <td style="padding: 1rem;">{{ rdv.motif }}</td>
-                <td style="padding: 1rem;"><span class="badge badge-success">Confirmé</span></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endblock %}
+        function nextMonth() {
+            alert('Mois suivant');
+        }
+    </script>
+</body>
+</html>

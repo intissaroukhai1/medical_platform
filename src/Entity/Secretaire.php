@@ -15,8 +15,8 @@ class Secretaire extends User
     #[ORM\ManyToOne(targetEntity: Medecin::class, inversedBy: 'secretaires')]
     private ?Medecin $medecin = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private ?string $motifContrat = null;
+   #[ORM\Column(type: 'string', length: 255, nullable: true)]
+   private ?string $motifContrat = null;
 
     public function __construct()
     {
@@ -25,10 +25,18 @@ class Secretaire extends User
     }
 
     public function getTypeContrat(): ?string { return $this->typeContrat; }
-    public function setTypeContrat(string $type): self { $this->typeContrat = $type; return $this; }
+    public function setTypeContrat(?string $type): self
+{
+    $this->typeContrat = $type;
+    return $this;
+}
 
     public function getMotifContrat(): ?string { return $this->motifContrat; }
-    public function setMotifContrat(string $motif): self { $this->motifContrat = $motif; return $this; }
+  public function setMotifContrat(?string $motif): self
+{
+    $this->motifContrat = $motif;
+    return $this;
+}
 
     public function getMedecin(): ?Medecin { return $this->medecin; }
     public function setMedecin(?Medecin $medecin): self { $this->medecin = $medecin; return $this; }

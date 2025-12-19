@@ -25,8 +25,8 @@ class Specialite
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
-    #[ORM\OneToMany(mappedBy: 'specialite', targetEntity: Medecin::class)]
-    private Collection $medecins;
+   #[ORM\ManyToMany(targetEntity: Medecin::class, mappedBy: 'specialites')]
+   private Collection $medecins;
 
     public function __construct()
     {
@@ -44,6 +44,26 @@ class Specialite
     public function getImage(): ?string { return $this->image; }
     public function setImage(?string $image): self { $this->image = $image; return $this; }
 
-    /** @return Collection<int, Medecin> */
-    public function getMedecins(): Collection { return $this->medecins; }
+    /**
+ * @return Collection<int, Medecin>
+ */
+public function getMedecins(): Collection
+{
+    return $this->medecins;
+}
+
+public function addMedecin(Medecin $medecin): self
+{
+    if (!$this->medecins->contains($medecin)) {
+        $this->medecins->add($medecin);
+    }
+    return $this;
+}
+
+public function removeMedecin(Medecin $medecin): self
+{
+    $this->medecins->removeElement($medecin);
+    return $this;
+}
+
 }

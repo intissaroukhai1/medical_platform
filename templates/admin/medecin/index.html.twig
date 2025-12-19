@@ -1,0 +1,675 @@
+{% extends 'admin/_layout_admin.html.twig' %}
+
+{% block title %}Médecins{% endblock %}
+
+{% block admin_content %}
+
+<style>
+/* ================= VARIABLES CSS MODERNES ================= */
+:root {
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --gradient-danger: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-secondary: linear-gradient(135deg, #a8b2d1 0%, #667eea 100%);
+    --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    
+    --color-text-primary: #1a202c;
+    --color-text-secondary: #718096;
+    --color-border: #e2e8f0;
+    --color-bg-light: #f7fafc;
+    
+    --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
+    --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.12);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+    
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================= CONTAINER ================= */
+.container-fluid {
+    padding: 3rem;
+    background: transparent;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================= HEADER SECTION ================= */
+.d-flex.justify-content-between.align-items-center.mb-4 {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 2rem 2.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass);
+    margin-bottom: 2rem !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.d-flex.justify-content-between.align-items-center.mb-4::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    height: 4px;
+    background: var(--gradient-primary);
+    border-radius: 10px;
+    animation: slideRight 0.8s ease-out;
+}
+
+@keyframes slideRight {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100px;
+    }
+}
+
+h2.fw-bold {
+    font-size: 2.25rem;
+    font-weight: 800 !important;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem !important;
+    letter-spacing: -0.5px;
+}
+
+.text-muted {
+    color: var(--color-text-secondary) !important;
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+/* ================= FLASH MESSAGES ================= */
+.alert {
+    border-radius: var(--radius-md);
+    border: none;
+    padding: 1.25rem 1.75rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(10px);
+    margin-bottom: 1.5rem;
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(17, 153, 142, 0.15) 0%, rgba(56, 239, 125, 0.15) 100%);
+    color: #0d9488;
+    border-left: 4px solid #11998e;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 111, 0.15) 100%);
+    color: #dc2626;
+    border-left: 4px solid #ff6b6b;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%);
+    color: #0284c7;
+    border-left: 4px solid #4facfe;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.15) 0%, rgba(245, 87, 108, 0.15) 100%);
+    color: #ea580c;
+    border-left: 4px solid #f093fb;
+}
+
+/* ================= CARD TABLE ================= */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-5px);
+}
+
+.card-body {
+    padding: 0 !important;
+}
+
+/* ================= TABLE MODERNE ================= */
+.table {
+    margin-bottom: 0 !important;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-light {
+    background: var(--gradient-primary) !important;
+    color: white !important;
+}
+
+.table thead th {
+    background: var(--gradient-primary);
+    color: white !important;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1.5rem 1.25rem;
+    border: none;
+    position: relative;
+}
+
+.table thead th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.table tbody tr {
+    transition: var(--transition-smooth);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: white;
+}
+
+.table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    transform: scale(1.01);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.table tbody td {
+    padding: 1.5rem 1.25rem;
+    vertical-align: middle;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    border: none;
+}
+
+.table tbody td strong {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+}
+
+.table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--radius-lg);
+}
+
+.table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--radius-lg);
+}
+
+/* ================= BADGES MODERNES ================= */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+.badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.badge:hover::before {
+    left: 100%;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+.badge.bg-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.badge.bg-success {
+    background: var(--gradient-success);
+    color: white;
+}
+
+.badge.bg-danger {
+    background: var(--gradient-danger);
+    color: white;
+}
+
+.badge.bg-secondary {
+    background: var(--gradient-secondary);
+    color: white;
+}
+
+/* ================= FORM MODERNE ================= */
+.d-flex.gap-2 {
+    display: flex !important;
+    gap: 0.75rem !important;
+    align-items: center;
+}
+
+.form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    background: white;
+    transition: var(--transition-smooth);
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    background: #fafbff;
+}
+
+.form-select:hover {
+    border-color: #a8b2d1;
+}
+
+.form-select option {
+    padding: 0.75rem;
+    font-weight: 600;
+}
+
+/* ================= BOUTONS ACTIVER / DÉSACTIVER ================= */
+.btn-success,
+.btn-danger {
+    padding: 0.75rem 1.75rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.btn-success::before,
+.btn-danger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-success:hover::before,
+.btn-danger:hover::before {
+    left: 100%;
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: 0 8px 20px rgba(17, 153, 142, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(17, 153, 142, 0.4);
+}
+
+.btn-success:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.btn-danger {
+    background: var(--gradient-danger);
+    color: white;
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(255, 107, 107, 0.4);
+}
+
+.btn-danger:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+/* ================= ACTIONS GROUPÉES ================= */
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.action-buttons form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.action-buttons form:first-child {
+    flex: 1;
+}
+
+/* ================= MESSAGE VIDE ================= */
+.text-center.text-muted.py-4 {
+    color: var(--color-text-secondary) !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 3rem 1rem !important;
+}
+
+/* ================= BTN CLOSE ================= */
+.btn-close {
+    opacity: 0.6;
+    transition: var(--transition-smooth);
+}
+
+.btn-close:hover {
+    opacity: 1;
+    transform: rotate(90deg) scale(1.2);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1200px) {
+    .table thead th {
+        font-size: 0.75rem;
+        padding: 1.25rem 1rem;
+    }
+    
+    .table tbody td {
+        padding: 1.25rem 1rem;
+    }
+    
+    .form-select {
+        font-size: 0.85rem;
+    }
+    
+    .btn-success,
+    .btn-danger {
+        padding: 0.65rem 1.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .container-fluid {
+        padding: 1.5rem;
+    }
+    
+    h2.fw-bold {
+        font-size: 1.75rem;
+    }
+    
+    .card {
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 900px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        padding: 1.5rem;
+    }
+    
+    h2.fw-bold {
+        font-size: 1.5rem;
+    }
+    
+    .text-muted {
+        font-size: 0.9rem;
+    }
+    
+    .table thead th {
+        font-size: 0.7rem;
+        padding: 1rem 0.75rem;
+    }
+    
+    .table tbody td {
+        padding: 1rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-success,
+    .btn-danger {
+        width: 100%;
+    }
+}
+
+/* ================= ANIMATIONS SUPPLÉMENTAIRES ================= */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.badge.bg-success {
+    animation: pulse 3s infinite;
+}
+
+/* ================= SCROLLBAR PERSONNALISÉE ================= */
+.card::-webkit-scrollbar {
+    height: 8px;
+}
+
+.card::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.card::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 10px;
+}
+
+.card::-webkit-scrollbar-thumb:hover {
+    background: var(--gradient-info);
+}
+</style>
+
+<div class="container-fluid">
+
+    {# ================= HEADER ================= #}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">👨‍⚕️ Médecins</h2>
+            <p class="text-muted mb-0">
+                Gestion des médecins et de leurs abonnements
+            </p>
+        </div>
+    </div>
+
+    {# ================= FLASH MESSAGES ================= #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {# ================= TABLE ================= #}
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Médecin</th>
+                        <th>Email</th>
+                        <th>Abonnement actif</th>
+                        <th>Statut</th>
+                        <th style="width: 400px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                {% for medecin in medecins %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {{ medecin.nom }} {{ medecin.prenom }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ medecin.email }}
+                        </td>
+
+                        <td>
+                            {% if medecin.activeAbonnement %}
+                                <span class="badge bg-primary">
+                                    {{ medecin.activeAbonnement.abonnement.nom }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    Aucun
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if medecin.activeAbonnement %}
+                                <span class="badge bg-success">
+                                    Actif
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    Inactif
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="action-buttons">
+                                {# FORMULAIRE ACTIVER ABONNEMENT (toujours visible) #}
+                                <form method="post"
+                                      action="{{ path('admin_medecin_abonnement', { id: medecin.id }) }}"
+                                      class="d-flex gap-2"
+                                      style="flex: 1;">
+
+                                    <select name="abonnement_id"
+                                            class="form-select form-select-sm"
+                                            required>
+                                        <option value="">-- Abonnement --</option>
+                                        {% for a in abonnements %}
+                                            {% if a.actif %}
+                                                <option value="{{ a.id }}">
+                                                    {{ a.nom }} – {{ a.prix }} €
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+
+                                    <button class="btn btn-success btn-sm">
+                                        ✅ Activer
+                                    </button>
+                                </form>
+
+                                {# BOUTON DÉSACTIVER (visible uniquement si abonnement actif) #}
+                                {% if medecin.activeAbonnement %}
+                                    <form method="post"
+                                          action="{{ path('admin_medecin_abonnement_disable', { id: medecin.id }) }}"
+                                          onsubmit="return confirm('⚠️ Désactiver cet abonnement ? L\'accès sera immédiatement coupé.');">
+                                        <button class="btn btn-danger btn-sm">
+                                            🚫 Désactiver
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            Aucun médecin trouvé
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

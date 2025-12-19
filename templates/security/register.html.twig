@@ -36,7 +36,8 @@
         </div>
 
         <!-- FORM -->
-        <form id="registerForm" class="register-form">
+        <form id="registerForm" class="register-form" method="POST">
+
 
             <!-- Email -->
             <div class="input-group">
@@ -47,24 +48,17 @@
                 </div>
             </div>
 
-            <!-- Username -->
-            <div class="input-group">
-                <label>Identifiant</label>
-                <div class="input-wrapper">
-                    <i class="bi bi-person input-icon"></i>
-                    <input type="text" id="username" name="username" placeholder="nom_utilisateur" required>
-                </div>
-            </div>
+           
 
             <!-- First & Last Name -->
             <div class="two-columns">
                 <div class="input-group">
                     <label>Prénom</label>
-                    <input type="text" id="firstName" name="firstName" placeholder="Votre prénom" required>
+                    <input type="text" id="firstName" name="prenom" placeholder="Votre prénom" required>
                 </div>
                 <div class="input-group">
                     <label>Nom</label>
-                    <input type="text" id="lastName" name="lastName" placeholder="Votre nom" required>
+                    <input type="text" id="lastName" name="nom" placeholder="Votre nom" required>
                 </div>
             </div>
 
@@ -207,8 +201,10 @@
 
                 <div class="input-group">
                     <label>Médecin associé</label>
-                    <select name="medecinId" class="input-select">
-                        <option selected disabled>Choisir un médecin…</option>
+                   <select name="medecinId" class="input-select" required>
+
+                        <option value="">-- Choisir un médecin --</option>
+
                     </select>
                 </div>
 
@@ -259,17 +255,52 @@
 
 <!-- ======================== JS DYNAMIQUE ======================== -->
 <script>
+
 function toggleRoleFields() {
+    // Cacher toutes les sections
     document.querySelectorAll(".role-section").forEach(el => el.style.display = "none");
+
+    // Désactiver tous les champs internes pour éviter validation
+    document.querySelectorAll(".role-section select, .role-section input, .role-section textarea")
+        .forEach(el => el.disabled = true);
 
     let role = document.getElementById("role").value;
 
-    if (role === "PATIENT") document.getElementById("patient-fields").style.display = "block";
-    if (role === "MEDECIN") document.getElementById("medecin-fields").style.display = "block";
-    if (role === "SECRETAIRE") document.getElementById("secretaire-fields").style.display = "block";
-    if (role === "ADMIN") document.getElementById("admin-fields").style.display = "block";
+    // Sélection médecinId
+    let medecinSelect = document.querySelector("select[name='medecinId']");
+    medecinSelect.removeAttribute("required");
+
+    if (role === "PATIENT") {
+        let section = document.getElementById("patient-fields");
+        section.style.display = "block";
+        section.querySelectorAll("input, select, textarea").forEach(el => el.disabled = false);
+    }
+
+    if (role === "MEDECIN") {
+        let section = document.getElementById("medecin-fields");
+        section.style.display = "block";
+        section.querySelectorAll("input, select, textarea").forEach(el => el.disabled = false);
+    }
+
+    if (role === "SECRETAIRE") {
+        let section = document.getElementById("secretaire-fields");
+        section.style.display = "block";
+        section.querySelectorAll("input, select, textarea").forEach(el => el.disabled = false);
+
+        // Obligatoire seulement si secrétaire
+        medecinSelect.setAttribute("required", "required");
+        loadMedecins();
+    }
+
+    if (role === "ADMIN") {
+        let section = document.getElementById("admin-fields");
+        section.style.display = "block";
+        section.querySelectorAll("input, select, textarea").forEach(el => el.disabled = false);
+    }
 }
 </script>
+
+
 
 <!-- ======================== CSS MODERNE ======================== -->
 <style>
@@ -669,5 +700,81 @@ function toggleRoleFields() {
     }
 }
 </style>
+<script>
+document.getElementById("registerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    let form = e.target;
+    let data = Object.fromEntries(new FormData(form).entries());
+
+    // 🔥 Ne pas supprimer medecinId même si vide
+    for (let key in data) {
+        if (key !== "medecinId" && data[key] === "") {
+            delete data[key];
+        }
+    }
+
+    let response;
+    let result;
+
+    try {
+        response = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        // 🔥 Vérifier si la réponse est JSON avant de parser
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+            result = await response.json();
+        } else {
+            // 🔥 Réponse HTML → afficher l’erreur côté Symfony !
+            const text = await response.text();
+            console.error("Réponse HTML reçue :", text);
+            alert("Erreur serveur : voir console");
+            return;
+        }
+
+        // 🔥 Gestion des erreurs
+        if (!response.ok) {
+            alert("❌ " + result.message);
+            return;
+        }
+
+        // 🔥 Succès
+        alert("✔ Compte créé avec succès !");
+        window.location.href = "/login";
+
+    } catch (err) {
+        alert("Erreur réseau : " + err);
+    }
+});
+
+async function loadMedecins() {
+    let select = document.querySelector("select[name='medecinId']");
+
+    // 🔥 Empêcher la duplication
+    select.innerHTML = `<option value="">-- Choisir un médecin --</option>`;
+
+    try {
+        let response = await fetch("/api/medecins");
+        let medecins = await response.json();
+
+        medecins.forEach(m => {
+            let option = document.createElement("option");
+            option.value = m.id;
+            option.textContent = m.nom + " " + m.prenom;
+            select.appendChild(option);
+        });
+
+    } catch (e) {
+        console.error("Erreur chargement médecins", e);
+    }
+}
+
+</script>
+
 
 {% endblock %}

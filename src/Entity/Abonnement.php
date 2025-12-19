@@ -2,12 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\AbonnementRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: AbonnementRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: 'abonnements')]
 class Abonnement
 {
@@ -17,64 +14,95 @@ class Abonnement
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
-    private ?string $type = null;
+    private string $nom;
 
     #[ORM\Column(type: 'float')]
-    private ?float $prix = null;
-
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $dateDebut = null;
-
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $dateExpiration = null;
+    private float $prix;
 
     #[ORM\Column(type: 'integer')]
-    private ?int $nbSecretaireAutorises = 1;
+    private int $nbSecretairesAutorises;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
 
     #[ORM\Column(type: 'boolean')]
     private bool $actif = true;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $modePaiement = null;
-
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $transactionId = null;
+    private ?string $stripePriceId = null;
 
-    #[ORM\OneToMany(mappedBy: 'abonnement', targetEntity: Medecin::class)]
-    private Collection $medecins;
+    /* =========================
+       ===== GETTERS ===========
+       ========================= */
 
-    public function __construct()
+    public function getId(): ?int
     {
-        $this->medecins = new ArrayCollection();
-        $this->dateDebut = new \DateTimeImmutable();
+        return $this->id;
     }
 
-    public function getId(): ?int { return $this->id; }
+    public function getNom(): string
+    {
+        return $this->nom;
+    }
 
-    public function getType(): ?string { return $this->type; }
-    public function setType(string $type): self { $this->type = $type; return $this; }
+    public function setNom(string $nom): self
+    {
+        $this->nom = $nom;
+        return $this;
+    }
 
-    public function getPrix(): ?float { return $this->prix; }
-    public function setPrix(float $prix): self { $this->prix = $prix; return $this; }
+    public function getPrix(): float
+    {
+        return $this->prix;
+    }
 
-    public function getDateDebut(): ?\DateTimeInterface { return $this->dateDebut; }
-    public function setDateDebut(\DateTimeInterface $d): self { $this->dateDebut = $d; return $this; }
+    public function setPrix(float $prix): self
+    {
+        $this->prix = $prix;
+        return $this;
+    }
 
-    public function getDateExpiration(): ?\DateTimeInterface { return $this->dateExpiration; }
-    public function setDateExpiration(\DateTimeInterface $d): self { $this->dateExpiration = $d; return $this; }
+    public function getNbSecretairesAutorises(): int
+    {
+        return $this->nbSecretairesAutorises;
+    }
 
-    public function getNbSecretaireAutorises(): ?int { return $this->nbSecretaireAutorises; }
-    public function setNbSecretaireAutorises(int $nb): self { $this->nbSecretaireAutorises = $nb; return $this; }
+    public function setNbSecretairesAutorises(int $nbSecretairesAutorises): self
+    {
+        $this->nbSecretairesAutorises = $nbSecretairesAutorises;
+        return $this;
+    }
 
-    public function isActif(): bool { return $this->actif; }
-    public function setActif(bool $actif): self { $this->actif = $actif; return $this; }
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
 
-    public function getModePaiement(): ?string { return $this->modePaiement; }
-    public function setModePaiement(?string $mode): self { $this->modePaiement = $mode; return $this; }
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
 
-    public function getTransactionId(): ?string { return $this->transactionId; }
-    public function setTransactionId(?string $id): self { $this->transactionId = $id; return $this; }
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
 
-    /** @return Collection<int, Medecin> */
-    public function getMedecins(): Collection { return $this->medecins; }
+    public function setActif(bool $actif): self
+    {
+        $this->actif = $actif;
+        return $this;
+    }
+
+    public function getStripePriceId(): ?string
+    {
+        return $this->stripePriceId;
+    }
+
+    public function setStripePriceId(?string $stripePriceId): self
+    {
+        $this->stripePriceId = $stripePriceId;
+        return $this;
+    }
 }
