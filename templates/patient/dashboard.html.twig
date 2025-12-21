@@ -1,522 +1,414 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Patient - Dawini</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends 'patient/_layout_patient.html.twig' %}
 
-        :root {
-            --primary: #0066CC;
-            --primary-dark: #0052A3;
-            --secondary: #00C9A7;
-            --accent: #FF6B6B;
-            --bg: #F8FAFC;
-            --surface: #FFFFFF;
-            --text-primary: #1E293B;
-            --text-secondary: #64748B;
-            --border: #E2E8F0;
-            --radius: 12px;
-        }
+{% block page_title %}Aperçu{% endblock %}
+{% block header_title %}Dashboard Patient{% endblock %}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg);
-        }
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* ============ CARDS MODERNES ============ */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
 
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            padding: 2rem 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #0066CC 0%, #00C9A7 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s ease;
+    }
 
-        .sidebar-logo {
-            padding: 0 1.5rem 2rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 1rem;
-        }
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+    }
 
-        .sidebar-menu {
-            list-style: none;
-        }
+    .card:hover::before {
+        transform: scaleX(1);
+    }
 
-        .sidebar-menu li {
-            margin: 0;
-        }
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
 
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all 0.3s;
-            gap: 1rem;
-            cursor: pointer;
-        }
+    .card-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        .sidebar-menu a:hover {
-            background-color: var(--bg);
-            color: var(--primary);
-            border-left: 3px solid var(--primary);
-            padding-left: calc(1.5rem - 3px);
-        }
+    .card-icon {
+        font-size: 2.5rem;
+        filter: drop-shadow(0 2px 8px rgba(0, 102, 204, 0.2));
+    }
 
-        .sidebar-menu a.active {
-            background-color: var(--bg);
-            color: var(--primary);
-            border-left: 3px solid var(--primary);
-            padding-left: calc(1.5rem - 3px);
-            font-weight: 600;
-        }
+    .card-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 1rem 0;
+        background: linear-gradient(135deg, #0066CC 0%, #00C9A7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
 
-        /* Main Content */
-        .main-content {
-            margin-left: 250px;
-            flex: 1;
-            padding: 2rem;
-        }
+    .card-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+        font-weight: 500;
+    }
 
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-        }
+    /* ============ SECTIONS MODERNES ============ */
+    .appointments-section,
+    .medical-records {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
 
-        .header h1 {
-            font-size: 1.75rem;
-        }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
+    }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
+    /* ============ APPOINTMENT ITEMS ============ */
+    .appointment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+        background: white;
+    }
 
-        .user-info {
-            text-align: right;
-        }
+    .appointment-item:last-child {
+        margin-bottom: 0;
+    }
 
-        .user-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
+    .appointment-item:hover {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(0, 102, 204, 0.02), rgba(0, 201, 167, 0.02));
+        transform: translateX(4px);
+        box-shadow: var(--shadow-sm);
+    }
 
-        .user-role {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
+    .appointment-info {
+        flex: 1;
+    }
 
-        /* Dashboard Grid */
+    .appointment-doctor {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .appointment-doctor::before {
+        content: "👨‍⚕️";
+        font-size: 1.25rem;
+    }
+
+    .appointment-date {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .appointment-status {
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-confirmed {
+        background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+        color: #065F46;
+        border: 1px solid #A7F3D0;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+        color: #92400E;
+        border: 1px solid #FDE68A;
+    }
+
+    .status-cancelled {
+        background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+        color: #991B1B;
+        border: 1px solid #FECACA;
+    }
+
+    /* ============ RECORD ITEMS ============ */
+    .record-item {
+        padding: 1.5rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        background: white;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .record-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .record-item:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .record-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: linear-gradient(135deg, #0066CC, #00C9A7);
+        color: white;
+        padding: 0.375rem 0.875rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0, 102, 204, 0.25);
+    }
+
+    .record-type.type-bilan {
+        background: linear-gradient(135deg, #06B6D4, #0891B2);
+    }
+
+    .record-type.type-diagnostic {
+        background: linear-gradient(135deg, #10B981, #059669);
+    }
+
+    .record-name {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1.05rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .record-date {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
         .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 1fr;
         }
 
-        .card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s;
+        .section-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
         }
 
-        .card:hover {
-            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        .section-header .btn {
+            width: 100%;
         }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .appointment-item {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
         }
 
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .card-icon {
-            font-size: 2rem;
+        .appointment-status {
+            text-align: center;
         }
 
         .card-value {
             font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 1rem 0;
         }
 
-        .card-description {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Appointments Section */
-        .appointments-section {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .appointment-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: calc(var(--radius) / 2);
-            margin-bottom: 1rem;
-            transition: all 0.3s;
-        }
-
-        .appointment-item:hover {
-            border-color: var(--primary);
-            background-color: rgba(0, 102, 204, 0.02);
-        }
-
-        .appointment-info {
-            flex: 1;
-        }
-
-        .appointment-doctor {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .appointment-date {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .appointment-status {
-            padding: 0.5rem 1rem;
-            border-radius: calc(var(--radius) / 2);
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .status-confirmed {
-            background-color: #D1F2EB;
-            color: #065F46;
-        }
-
-        .status-pending {
-            background-color: #FEF3C7;
-            color: #92400E;
-        }
-
-        .status-cancelled {
-            background-color: #FEE2E2;
-            color: #7F1D1D;
-        }
-
-        /* Medical Records */
+        .appointments-section,
         .medical-records {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 2rem;
-        }
-
-        .record-item {
             padding: 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: calc(var(--radius) / 2);
-            margin-bottom: 1rem;
         }
+    }
+</style>
+{% endblock %}
 
-        .record-type {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .record-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin: 0.5rem 0;
-        }
-
-        .record-date {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: calc(var(--radius) / 2);
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: white;
-            font-weight: 600;
-        }
-
-        .btn-secondary:hover {
-            background-color: #00B896;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .sidebar-menu {
-                display: flex;
-                gap: 0.5rem;
-                flex-wrap: wrap;
-            }
-
-            .sidebar-menu a {
-                padding: 0.5rem 1rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-logo">Dawini</div>
-            <ul class="sidebar-menu">
-                <li><a class="active" onclick="navigateTo('overview')">📊 Aperçu</a></li>
-                <li><a onclick="navigateTo('appointments')">📅 Rendez-vous</a></li>
-                <li><a onclick="navigateTo('medical')">📋 Dossier Médical</a></li>
-                <li><a onclick="navigateTo('prescriptions')">💊 Ordonnances</a></li>
-                <li><a onclick="navigateTo('search')">🔍 Chercher Médecin</a></li>
-                <li><a onclick="navigateTo('profile')">👤 Mon Profil</a></li>
-                <a href="{{ path('app_logout') }}">🚪 Déconnexion</a>
-
-            </ul>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <div class="header">
-    <h1>Dashboard Patient</h1>
-
-    <div class="user-profile">
-
-        <div class="user-info">
-            <!-- NOM + PRÉNOM -->
-            <div class="user-name">
-                {{ patient.prenom }} {{ patient.nom }}
-            </div>
-
-            <!-- ROLE -->
-            <div class="user-role">
-                {{ patient.roles[0] | replace({'ROLE_':''}) | lower | capitalize }}
-            </div>
+{% block page_content %}
+<!-- Stats Cards -->
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Rendez-vous</div>
+            <div class="card-icon">📅</div>
         </div>
+        <div class="card-value">{{ stats.appointments ?? 3 }}</div>
+        <div class="card-description">À venir ce mois</div>
+    </div>
 
-        <!-- AVATAR AVEC INITIALES -->
-        <div class="user-avatar">
-            {{ patient.prenom|first|upper }}{{ patient.nom|first|upper }}
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Médecins</div>
+            <div class="card-icon">👨‍⚕️</div>
         </div>
+        <div class="card-value">{{ stats.doctors ?? 5 }}</div>
+        <div class="card-description">Spécialistes en suivi</div>
+    </div>
 
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Ordonnances</div>
+            <div class="card-icon">💊</div>
+        </div>
+        <div class="card-value">{{ stats.prescriptions ?? 8 }}</div>
+        <div class="card-description">Actives</div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Documents</div>
+            <div class="card-icon">📄</div>
+        </div>
+        <div class="card-value">{{ stats.documents ?? 12 }}</div>
+        <div class="card-description">Dans votre dossier</div>
     </div>
 </div>
 
+<!-- Appointments Section -->
+<div class="appointments-section">
+    <div class="section-header">
+        <h2 class="section-title">📅 Mes Rendez-vous</h2>
 
-            <!-- Stats Cards -->
-            <div class="dashboard-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Rendez-vous</div>
-                        <div class="card-icon">📅</div>
-                    </div>
-                    <div class="card-value">3</div>
-                    <div class="card-description">À venir ce mois</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Médecins</div>
-                        <div class="card-icon">👨‍⚕️</div>
-                    </div>
-                    <div class="card-value">5</div>
-                    <div class="card-description">Spécialistes en suivi</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Ordonnances</div>
-                        <div class="card-icon">💊</div>
-                    </div>
-                    <div class="card-value">8</div>
-                    <div class="card-description">Actives</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Documents</div>
-                        <div class="card-icon">📄</div>
-                    </div>
-                    <div class="card-value">12</div>
-                    <div class="card-description">Dans votre dossier</div>
-                </div>
-            </div>
-
-            <!-- Upcoming Appointments -->
-            <div class="appointments-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2 class="section-title">Mes Rendez-vous</h2>
-                    <button class="btn btn-primary" onclick="alert('Redirection vers prise de RDV')">+ Nouveau RDV</button>
-                </div>
-
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <div class="appointment-doctor">Dr. Ahmed El Alami - Cardiologue</div>
-                        <div class="appointment-date">📅 25 Décembre 2024, 14:00</div>
-                    </div>
-                    <div class="appointment-status status-confirmed">Confirmé</div>
-                </div>
-
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <div class="appointment-doctor">Dr. Fatima Zahra - Dermatologue</div>
-                        <div class="appointment-date">📅 28 Décembre 2024, 10:30</div>
-                    </div>
-                    <div class="appointment-status status-confirmed">Confirmé</div>
-                </div>
-
-                <div class="appointment-item">
-                    <div class="appointment-info">
-                        <div class="appointment-doctor">Dr. Mohamed Bennani - Médecin Général</div>
-                        <div class="appointment-date">📅 30 Décembre 2024, 16:00</div>
-                    </div>
-                    <div class="appointment-status status-pending">En attente</div>
-                </div>
-            </div>
-
-            <!-- Medical Records -->
-            <div class="medical-records">
-                <h2 class="section-title">Dossier Médical</h2>
-
-                <div class="record-item">
-                    <span class="record-type">ORDONNANCE</span>
-                    <div class="record-name">Ordonnance - Consultation Cardiologue</div>
-                    <div class="record-date">📅 20 Décembre 2024</div>
-                </div>
-
-                <div class="record-item">
-                    <span class="record-type" style="background: var(--secondary);">BILAN</span>
-                    <div class="record-name">Bilan Sanguin Complet</div>
-                    <div class="record-date">📅 18 Décembre 2024</div>
-                </div>
-
-                <div class="record-item">
-                    <span class="record-type" style="background: var(--accent);">DIAGNOSTIC</span>
-                    <div class="record-name">Diagnostic et Compte Rendu</div>
-                    <div class="record-date">📅 15 Décembre 2024</div>
-                </div>
-            </div>
-        </main>
+        <!-- Lien réel -->
+        <a href="{{ path('patient_rendezvous') }}" class="btn btn-primary">
+            + Nouveau RDV
+        </a>
     </div>
 
-    <script>
-        function navigateTo(page) {
-            alert(`Navigation vers: ${page}`);
-        }
+    {% if rendezvous is defined and rendezvous|length > 0 %}
+        {% for rdv in rendezvous %}
+            <div class="appointment-item">
+                <div class="appointment-info">
+                    <div class="appointment-doctor">
+                        👨‍⚕️ Dr. {{ rdv.medecin.prenom }} {{ rdv.medecin.nom }}
+                        —
+                        {{ rdv.medecin.specialites|first.nom }}
+                    </div>
 
-        function logout() {
-            if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
-                window.location.href = 'index.html';
-            }
-        }
-    </script>
-</body>
-</html>
+                    <div class="appointment-date">
+                        📅 {{ rdv.date|date('d F Y, H:i') }}
+                    </div>
+
+                    <div class="appointment-mode">
+                        {% if rdv.mode == 'presentiel' %}
+                            🏥 Présentiel
+                        {% else %}
+                            💻 Vidéo
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="appointment-status">
+                    {% if rdv.statut == constant('App\\Entity\\RendezVous::STATUT_CONFIRME') %}
+                        <span class="status-confirmed">Confirmé</span>
+                    {% elseif rdv.statut == constant('App\\Entity\\RendezVous::STATUT_EN_ATTENTE') %}
+                        <span class="status-pending">En attente</span>
+                    {% else %}
+                        <span class="status-cancelled">Annulé</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            📭 Aucun rendez-vous pour le moment
+        </div>
+    {% endif %}
+</div>
+
+
+<!-- Medical Records Section -->
+<div class="medical-records">
+    <h2 class="section-title" style="margin-bottom: 1.5rem;">📋 Dossier Médical</h2>
+
+    {% if records is defined and records|length > 0 %}
+        {% for record in records %}
+            <div class="record-item">
+                <span class="record-type">{{ record.type|upper }}</span>
+                <div class="record-name">{{ record.nom }}</div>
+                <div class="record-date">📅 {{ record.date|date('d F Y') }}</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="record-item">
+            <span class="record-type">💊 Ordonnance</span>
+            <div class="record-name">Ordonnance - Consultation Cardiologue</div>
+            <div class="record-date">📅 20 Décembre 2024</div>
+        </div>
+
+        <div class="record-item">
+            <span class="record-type type-bilan">🩺 Bilan</span>
+            <div class="record-name">Bilan Sanguin Complet</div>
+            <div class="record-date">📅 18 Décembre 2024</div>
+        </div>
+
+        <div class="record-item">
+            <span class="record-type type-diagnostic">📊 Diagnostic</span>
+            <div class="record-name">Diagnostic et Compte Rendu</div>
+            <div class="record-date">📅 15 Décembre 2024</div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

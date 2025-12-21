@@ -313,5 +313,8 @@ public function getAbonnements(): Collection
     return $this->abonnements;
 }
 
-
+public function __toString(): string
+{
+    return $this->nom ?? 'Médecin';
+}
 }

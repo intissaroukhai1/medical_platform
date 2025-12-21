@@ -674,10 +674,11 @@
                 </a>
             </li>
             <li>
-                <a href="{{ path('medecin_disponibilite') }}" 
-                   class="{{ app.request.attributes.get('_route') starts with 'medecin_disponibilite' ? 'active' : '' }}">
-                    ⏰ Disponibilité
-                </a>
+   <a href="{{ path('medecin_disponibilite') }}"
+   class="{{ app.request.attributes.get('_route') == 'medecin_disponibilite' ? 'active' : '' }}">
+    ⏰ Disponibilité
+</a>
+
             </li>
             <li>
                 <a href="{{ path('user_profile') }}">

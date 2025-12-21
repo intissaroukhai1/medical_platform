@@ -1,0 +1,385 @@
+{% extends 'patient/_layout_patient.html.twig' %}
+
+{% block page_title %}Mes Rendez-vous{% endblock %}
+{% block header_title %}Mes Rendez-vous{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* ============ FORM CARD ============ */
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #0066CC 0%, #00C9A7 100%);
+    }
+
+    .form-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ============ FORM STYLES ============ */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        background: white;
+        font-family: inherit;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* ============ TABLE STYLES ============ */
+    .rdv-table-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .rdv-table-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #00C9A7 0%, #0066CC 100%);
+    }
+
+    .rdv-table-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, rgba(0, 102, 204, 0.05), rgba(0, 201, 167, 0.05));
+    }
+
+    .table th {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s;
+    }
+
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(0, 102, 204, 0.02), rgba(0, 201, 167, 0.02));
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* ============ BADGES ============ */
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #FFFBEB, #FEF3C7);
+        color: #92400E;
+        border: 1px solid #FDE68A;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+        color: #065F46;
+        border: 1px solid #A7F3D0;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+        color: #991B1B;
+        border: 1px solid #FECACA;
+    }
+
+    /* ============ EMPTY STATE ============ */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state-text {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+        .form-card,
+        .rdv-table-card {
+            padding: 1.5rem;
+        }
+
+        .table {
+            font-size: 0.875rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.875rem;
+        }
+
+        /* Responsive table */
+        .table thead {
+            display: none;
+        }
+
+        .table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            background: white;
+        }
+
+        .table td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td:last-child {
+            border-bottom: none;
+        }
+
+        .table td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<!-- Formulaire Nouveau Rendez-vous -->
+<div class="form-card">
+    <h2 class="form-card-title">
+        <span>➕</span>
+        Nouveau Rendez-vous
+    </h2>
+
+    {# Messages flash spécifiques au formulaire #}
+    {% for label, messages in app.flashes(['rdv_success', 'rdv_error', 'rdv_info']) %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label == 'rdv_success' ? 'success' : (label == 'rdv_error' ? 'danger' : 'info') }}" style="margin-bottom: 1.5rem;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {{ form_start(form) }}
+        {# 1. Choisir la spécialité d'abord #}
+        <div class="form-group">
+    {{ form_label(form.specialite, 'Spécialité', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.specialite, {'attr': {'class': 'form-select'}}) }}
+    {{ form_errors(form.specialite) }}
+</div>
+
+<div style="margin-bottom: 1.5rem;">
+            <button
+                type="submit"
+                name="filter"
+                value="1"
+                class="btn btn-secondary"
+                formnovalidate
+            >
+                🔍 Filtrer les médecins
+            </button>
+        </div>
+
+
+      
+
+        {# 2. Ensuite choisir le médecin filtré #}
+        <div class="form-group">
+            {{ form_label(form.medecin, 'Médecin', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.medecin, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.medecin) }}
+        </div>
+
+        {# 3. Date et heure #}
+        <div class="form-group">
+            {{ form_label(form.date, 'Date et Heure', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.date) }}
+        </div>
+
+        {# 4. Mode de consultation #}
+        <div class="form-group">
+            {{ form_label(form.mode, 'Mode de Consultation', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.mode, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.mode) }}
+        </div>
+
+        {# 5. Motif #}
+        <div class="form-group">
+            {{ form_label(form.motif, 'Motif de la Consultation', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.motif, {'attr': {'class': 'form-control', 'placeholder': 'Décrivez brièvement le motif de votre consultation...'}}) }}
+            {{ form_errors(form.motif) }}
+        </div>
+
+        {# Bouton final pour créer le RDV #}
+        <button type="submit" name="create" class="btn btn-primary">
+            📅 Créer le rendez-vous
+        </button>
+    {{ form_end(form) }}
+</div>
+
+<!-- Liste des Rendez-vous -->
+<div class="rdv-table-card">
+    <h2 class="rdv-table-title">
+        <span>📋</span>
+        Mes Rendez-vous
+    </h2>
+
+    {% if rendezvous|length > 0 %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Médecin</th>
+                    <th>Spécialité</th>
+                    <th>Date</th>
+                    <th>Mode</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rdv in rendezvous %}
+                    <tr>
+                        <td data-label="Médecin">
+                            Dr. {{ rdv.medecin.prenom }} {{ rdv.medecin.nom }}
+                        </td>
+                        <td data-label="Spécialité">
+                         {% for spec in rdv.medecin.specialites %}
+    {{ spec.nom }}{% if not loop.last %}, {% endif %}
+{% endfor %}
+                        </td>
+                        <td data-label="Date">
+                            📅 {{ rdv.date|date('d/m/Y à H:i') }}
+                        </td>
+                        <td data-label="Mode">
+                            {% if rdv.mode == 'presentiel' %}
+    🏥 Présentiel
+   
+{% elseif rdv.mode == 'video' %}
+    💻 Vidéo
+{% endif %}
+                        </td>
+                        <td data-label="Statut">
+                            {% if rdv.statut == constant('App\\Entity\\RendezVous::STATUT_EN_ATTENTE') %}
+                                <span class="badge badge-warning">⏳ En attente</span>
+                            {% elseif rdv.statut == constant('App\\Entity\\RendezVous::STATUT_CONFIRME') %}
+                                <span class="badge badge-success">✅ Confirmé</span>
+                            {% elseif rdv.statut == constant('App\\Entity\\RendezVous::STATUT_ANNULE') %}
+                                <span class="badge badge-danger">❌ Annulé</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-text">Aucun rendez-vous pour le moment</div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

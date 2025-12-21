@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251219172321 extends AbstractMigration
+final class Version20251220191006 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -23,12 +23,10 @@ final class Version20251219172321 extends AbstractMigration
         $this->addSql('ALTER TABLE abonnements CHANGE stripe_price_id stripe_price_id VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE admins CHANGE derniere_connexion derniere_connexion DATETIME DEFAULT NULL');
         $this->addSql('ALTER TABLE dossiers_medical CHANGE fichiers fichiers JSON DEFAULT NULL');
-        $this->addSql('ALTER TABLE medecin_abonnements DROP FOREIGN KEY `FK_215600604F31A84`');
         $this->addSql('ALTER TABLE medecin_abonnements CHANGE date_expiration date_expiration DATETIME DEFAULT NULL, CHANGE stripe_subscription_id stripe_subscription_id VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE medecin_abonnements ADD CONSTRAINT FK_215600604F31A84 FOREIGN KEY (medecin_id) REFERENCES medecins (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE medecins CHANGE latitude latitude DOUBLE PRECISION DEFAULT NULL, CHANGE longitude longitude DOUBLE PRECISION DEFAULT NULL');
         $this->addSql('ALTER TABLE patients CHANGE latitude latitude DOUBLE PRECISION DEFAULT NULL, CHANGE longitude longitude DOUBLE PRECISION DEFAULT NULL, CHANGE mutuelle mutuelle VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE rendezvous CHANGE motif motif VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE rendezvous CHANGE motif motif VARCHAR(255) DEFAULT NULL, CHANGE patient_id patient_id INT NOT NULL, CHANGE medecin_id medecin_id INT NOT NULL');
         $this->addSql('ALTER TABLE secretaires CHANGE motif_contrat motif_contrat VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE specialites CHANGE image image VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE users CHANGE telephone telephone VARCHAR(20) DEFAULT NULL, CHANGE photo_profil photo_profil VARCHAR(255) DEFAULT NULL, CHANGE roles roles JSON NOT NULL, CHANGE date_modification date_modification DATETIME DEFAULT NULL');
@@ -42,12 +40,10 @@ final class Version20251219172321 extends AbstractMigration
         $this->addSql('ALTER TABLE admins CHANGE derniere_connexion derniere_connexion DATETIME DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE dossiers_medical CHANGE fichiers fichiers LONGTEXT DEFAULT NULL COLLATE `utf8mb4_bin`');
         $this->addSql('ALTER TABLE medecins CHANGE latitude latitude DOUBLE PRECISION DEFAULT \'NULL\', CHANGE longitude longitude DOUBLE PRECISION DEFAULT \'NULL\'');
-        $this->addSql('ALTER TABLE medecin_abonnements DROP FOREIGN KEY FK_215600604F31A84');
         $this->addSql('ALTER TABLE medecin_abonnements CHANGE date_expiration date_expiration DATETIME DEFAULT \'NULL\', CHANGE stripe_subscription_id stripe_subscription_id VARCHAR(255) DEFAULT \'NULL\'');
-        $this->addSql('ALTER TABLE medecin_abonnements ADD CONSTRAINT `FK_215600604F31A84` FOREIGN KEY (medecin_id) REFERENCES medecins (id)');
         $this->addSql('ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE patients CHANGE latitude latitude DOUBLE PRECISION DEFAULT \'NULL\', CHANGE longitude longitude DOUBLE PRECISION DEFAULT \'NULL\', CHANGE mutuelle mutuelle VARCHAR(255) DEFAULT \'NULL\'');
-        $this->addSql('ALTER TABLE rendezvous CHANGE motif motif VARCHAR(255) DEFAULT \'NULL\'');
+        $this->addSql('ALTER TABLE rendezvous CHANGE motif motif VARCHAR(255) DEFAULT \'NULL\', CHANGE patient_id patient_id INT DEFAULT NULL, CHANGE medecin_id medecin_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE secretaires CHANGE motif_contrat motif_contrat VARCHAR(255) DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE specialites CHANGE image image VARCHAR(255) DEFAULT \'NULL\'');
         $this->addSql('ALTER TABLE users CHANGE telephone telephone VARCHAR(20) DEFAULT \'NULL\', CHANGE photo_profil photo_profil VARCHAR(255) DEFAULT \'NULL\', CHANGE roles roles LONGTEXT NOT NULL COLLATE `utf8mb4_bin`, CHANGE date_modification date_modification DATETIME DEFAULT \'NULL\'');

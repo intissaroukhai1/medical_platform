@@ -1,0 +1,578 @@
+{% extends 'medecin/_layout_medecin.html.twig' %}
+
+{% block content %}
+<style>
+/* Style uniquement pour la page des disponibilités */
+.disponibilites-page {
+    padding: 2rem;
+}
+
+.disponibilites-page h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2rem;
+}
+
+/* Formulaire d'ajout/modification */
+.add-disponibilite-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s;
+}
+
+.add-disponibilite-card.edit-mode {
+    border: 2px solid #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.card-header h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-mode .card-header h5 {
+    color: #92400e;
+}
+
+.edit-badge {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+
+.form-group select,
+.form-group input[type="time"] {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.form-group select:focus,
+.form-group input[type="time"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.edit-mode .form-group select:focus,
+.edit-mode .form-group input[type="time"]:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.form-check-wrapper {
+    display: flex;
+    align-items: flex-end;
+    padding-top: 1.8rem;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-check input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.form-check label {
+    font-size: 0.875rem;
+    color: #475569;
+    cursor: pointer;
+    margin: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+    padding: 0.625rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.edit-mode .btn-primary {
+    background: #f59e0b;
+}
+
+.edit-mode .btn-primary:hover {
+    background: #d97706;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.625rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+/* Table des disponibilités */
+.disponibilites-table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table-header {
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.table-header h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.disponibilites-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.disponibilites-table thead {
+    background: #f8fafc;
+}
+
+.disponibilites-table th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.disponibilites-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.disponibilites-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.disponibilites-table tbody tr.editing {
+    background: #fef3c7;
+}
+
+.disponibilites-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.disponibilites-table td {
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.jour-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+}
+
+.time-display {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+    color: #1e293b;
+    background: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.status-badge.actif {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.inactif {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Actions buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-action {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-edit {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.btn-edit:hover {
+    background: #fde047;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.delete-form {
+    display: inline;
+    margin: 0;
+}
+
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border-left: 4px solid #22c55e;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+.alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .disponibilites-page {
+        padding: 1rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .form-actions .btn-primary,
+    .form-actions .btn-secondary {
+        width: 100%;
+        text-align: center;
+    }
+
+    .disponibilites-table {
+        font-size: 0.8125rem;
+    }
+
+    .disponibilites-table th,
+    .disponibilites-table td {
+        padding: 0.75rem 1rem;
+    }
+
+    .disponibilites-page h2 {
+        font-size: 1.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
+    }
+
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.disponibilites-table tbody tr {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.edit-mode {
+    animation: pulse 0.5s ease-out;
+}
+</style>
+
+<div class="disponibilites-page">
+    <h2>🕒 Mes disponibilités</h2>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="add-disponibilite-card {{ editId ? 'edit-mode' : '' }}">
+        <div class="card-header">
+            <h5>
+                {{ editId ? '✏️ Modifier disponibilité' : '➕ Ajouter une disponibilité' }}
+            </h5>
+            {% if editId %}
+                <span class="edit-badge">Mode édition</span>
+            {% endif %}
+        </div>
+        
+        {{ form_start(form) }}
+            <div class="form-grid">
+                <div class="form-group">
+                    {{ form_label(form.jour, 'Jour de la semaine') }}
+                    {{ form_widget(form.jour) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.heureDebut, 'Heure de début') }}
+                    {{ form_widget(form.heureDebut) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.heureFin, 'Heure de fin') }}
+                    {{ form_widget(form.heureFin) }}
+                </div>
+                
+                <div class="form-check-wrapper">
+                    <div class="form-check">
+                        {{ form_widget(form.actif) }}
+                        {{ form_label(form.actif, 'Disponible') }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    {{ editId ? '✓ Mettre à jour' : 'Enregistrer' }}
+                </button>
+                {% if editId %}
+                    <a href="{{ path('medecin_disponibilite') }}" class="btn-secondary">
+                        ✕ Annuler
+                    </a>
+                {% endif %}
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="disponibilites-table-card">
+        <div class="table-header">
+            <h6>📋 Liste des disponibilités</h6>
+        </div>
+        
+        <table class="disponibilites-table">
+            <thead>
+                <tr>
+                    <th>Jour</th>
+                    <th>Heure</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in disponibilites %}
+                    <tr class="{{ editId == d.id ? 'editing' : '' }}">
+                        <td>
+                            <span class="jour-badge">{{ d.jour }}</span>
+                        </td>
+                        <td>
+                            <span class="time-display">{{ d.heureDebut|date('H:i') }} - {{ d.heureFin|date('H:i') }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge {{ d.actif ? 'actif' : 'inactif' }}">
+                                {{ d.actif ? '✅ Actif' : '❌ Inactif' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                               <a href="{{ path('medecin_disponibilite', { edit: d.id }) }}"
+   class="btn-action btn-edit">
+    ✏️ Modifier
+</a>
+                                <form method="post"
+                                      action="{{ path('medecin_disponibilite_delete', {id: d.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette disponibilité ?');"
+                                      class="delete-form">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete' ~ d.id) }}">
+                                    <button type="submit" class="btn-action btn-delete">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📅</div>
+                                <p>Aucune disponibilité enregistrée</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
