@@ -37,11 +37,16 @@ class AuthController extends AbstractController
         // 🔥 1) Créer le bon type d'utilisateur
         // =============================================
         $role = strtoupper($data['role']);
+        if ($role === 'SECRETAIRE') {
+    return new JsonResponse([
+        'message' => 'Création de compte secrétaire interdite via inscription publique'
+    ], 403);
+}
+
         $entity = null;
 
         if ($role === "PATIENT")      $entity = new Patient();
         elseif ($role === "MEDECIN")  $entity = new Medecin();
-        elseif ($role === "SECRETAIRE") $entity = new Secretaire();
         elseif ($role === "ADMIN")    $entity = new Admin();
         else                           $entity = new User();
 
@@ -80,26 +85,7 @@ class AuthController extends AbstractController
             $entity->setBiographie($data['biographie']);
         }
 
-if ($entity instanceof Secretaire) {
 
-   $medecinId = $data['medecinId'] ?? null;
-
-if (!$medecinId) {
-    return new JsonResponse(['message' => 'medecinId manquant'], 400);
-}
-
-$medecin = $em->getRepository(Medecin::class)->find($medecinId);
-if (!$medecin) {
-    return new JsonResponse(['message' => 'Médecin introuvable'], 404);
-}
-
-
-    $entity->setMedecin($medecin);
-
-    // Champs facultatifs / sécurisés
-    $entity->setTypeContrat($data['typeContrat'] ?? null);
-    $entity->setMotifContrat($data['motifContrat'] ?? null);
-}
         if ($entity instanceof Admin) {
             $entity->setAccesTotal($data['accesTotal'] ?? false);
         }

@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Medecin;
 use App\Entity\Secretaire;
-
+use Doctrine\Common\Collections\Collection;
 class AbonnementAccessService
 {
     /**
@@ -45,8 +45,14 @@ class AbonnementAccessService
     /**
      * Une secrétaire a accès si le médecin a un abonnement actif
      */
-    public function secretaireHasAccess(Medecin $medecin): bool
-    {
-        return $this->medecinHasAccess($medecin);
+   public function secretaireHasAccess(Secretaire $secretaire): bool
+{
+    foreach ($secretaire->getMedecins() as $medecin) {
+        if ($this->medecinHasAccess($medecin)) {
+            return true; // au moins un médecin valide
+        }
     }
+
+    return false;
+}
 }

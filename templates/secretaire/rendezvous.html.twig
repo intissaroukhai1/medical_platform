@@ -1,0 +1,684 @@
+{% extends 'secretaire/_layout_secretaire.html.twig' %}
+
+{% block title %}Gestion des Rendez-vous{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ================= DESIGN SYSTEM MÉDICAL ================= */
+:root {
+    /* Palette médicale professionnelle */
+    --medical-primary: #0891b2;
+    --medical-primary-hover: #0e7490;
+    --medical-primary-light: #cffafe;
+    
+    --medical-accent: #06b6d4;
+    --medical-success: #10b981;
+    --medical-danger: #dc2626;
+    --medical-warning: #f59e0b;
+    --medical-info: #3b82f6;
+
+    /* Backgrounds médicaux doux */
+    --bg-primary: #f0f9ff;
+    --bg-secondary: #e0f2fe;
+    --bg-card: #ffffff;
+    --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+    
+    /* Textes professionnels */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+
+    /* Bordures subtiles */
+    --border: #cbd5e1;
+    --border-light: #e2e8f0;
+    
+    /* Rayons arrondis médicaux */
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+
+    /* Ombres professionnelles */
+    --shadow-sm: 0 1px 3px rgba(8, 145, 178, 0.08);
+    --shadow-md: 0 4px 12px rgba(8, 145, 178, 0.12);
+    --shadow-lg: 0 8px 24px rgba(8, 145, 178, 0.15);
+    --shadow-hover: 0 12px 32px rgba(8, 145, 178, 0.2);
+
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ================= CONTAINER ================= */
+.rdv-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ================= HEADER ================= */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding: 2rem 2.5rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--border-light);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--medical-primary), var(--medical-accent), var(--medical-info));
+    background-size: 200% 100%;
+    animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+.header-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-accent));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    box-shadow: 0 8px 20px rgba(8, 145, 178, 0.25);
+    flex-shrink: 0;
+}
+
+.header-content h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.header-content p {
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    font-size: 1.05rem;
+}
+
+/* ================= ALERTS ================= */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid;
+    animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success { 
+    background: #d1fae5; 
+    color: #065f46; 
+    border-color: #10b981;
+}
+.alert-danger { 
+    background: #fee2e2; 
+    color: #991b1b; 
+    border-color: #dc2626;
+}
+.alert-warning { 
+    background: #fef3c7; 
+    color: #92400e; 
+    border-color: #f59e0b;
+}
+
+/* ================= CARD ================= */
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-light);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--medical-primary);
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    border-bottom: 2px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-body {
+    padding: 2.5rem;
+}
+
+/* ================= FORM ================= */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+}
+
+input, select {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--medical-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+    padding: 0.875rem 1.75rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-success { 
+    background: linear-gradient(135deg, var(--medical-success), #059669); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary { 
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-accent)); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+}
+
+.btn-danger { 
+    background: linear-gradient(135deg, var(--medical-danger), #b91c1c); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-warning { 
+    background: linear-gradient(135deg, var(--medical-warning), #d97706); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-secondary { 
+    background: #f1f5f9;
+    color: var(--text-primary);
+    border: 2px solid var(--border);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(8, 145, 178, 0.35);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-sm {
+    padding: 0.625rem 1.125rem;
+    font-size: 0.875rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+/* ================= TABLE ================= */
+.table-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-light);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    border-bottom: 3px solid var(--medical-primary);
+}
+
+.table th {
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.table td {
+    padding: 1.125rem 1.5rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.95rem;
+}
+
+.table tbody tr {
+    transition: var(--transition);
+    background: white;
+}
+
+.table tbody tr:nth-child(even) {
+    background: var(--bg-primary);
+}
+
+.table tbody tr:hover {
+    background: #cffafe;
+    transform: scale(1.01);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ================= STATUS BADGES ================= */
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid;
+}
+
+.status-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.status-badge.en-attente { 
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #f59e0b;
+}
+
+.status-badge.en-attente::before {
+    background: #f59e0b;
+}
+
+.status-badge.confirme { 
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #10b981;
+}
+
+.status-badge.confirme::before {
+    background: #10b981;
+}
+
+.status-badge.annule { 
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #dc2626;
+}
+
+.status-badge.annule::before {
+    background: #dc2626;
+}
+
+/* ================= ACTIONS ================= */
+.actions-wrap {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.actions-wrap form {
+    margin: 0;
+}
+
+/* ================= EMPTY STATE ================= */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .rdv-container {
+        padding: 1rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .header-content h1 {
+        font-size: 1.75rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 600px;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ================= SCROLLBAR ================= */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--medical-primary);
+    border-radius: 10px;
+    border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--medical-primary-hover);
+}
+
+/* ================= ANIMATIONS SUPPLÉMENTAIRES ================= */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.card, .table-container {
+    animation: fadeIn 0.5s ease;
+}
+</style>
+{% endblock %}
+
+{% block secretaire_content %}
+<div class="rdv-container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="header-icon">📅</div>
+        <div class="header-content">
+            <h1>Gestion des Rendez-vous</h1>
+            <p>Créez et gérez les rendez-vous de vos patients</p>
+        </div>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- FORM -->
+    <div class="card">
+        <div class="card-header">
+            {{ editRdv ? '✏️ Modifier le rendez-vous' : '➕ Nouveau rendez-vous' }}
+        </div>
+
+        <div class="card-body">
+            {{ form_start(form) }}
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_row(form.patient) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_row(form.date) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_row(form.mode) }}
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">
+                    {{ editRdv ? '💾 Enregistrer' : '➕ Créer le rendez-vous' }}
+                </button>
+
+                {% if editRdv %}
+                    <a href="{{ path('secretaire_rendez_vous') }}" class="btn btn-secondary">
+                        ← Annuler
+                    </a>
+                {% endif %}
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Date & Heure</th>
+                    <th>Mode</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if rendezvous is empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">
+                            Aucun rendez-vous
+                        </td>
+                    </tr>
+                {% else %}
+                    {% for rdv in rendezvous %}
+                        <tr>
+                            <td>{{ rdv.patient.prenom }} {{ rdv.patient.nom }}</td>
+                            <td>{{ rdv.date|date('d/m/Y H:i') }}</td>
+                            <td>{{ rdv.mode|upper }}</td>
+                            <td>
+                                <span class="status-badge {{ rdv.statut|lower|replace({' ': '-'}) }}">
+                                    {{ rdv.statut|upper }}
+                                </span>
+                            </td>
+
+                            <td class="actions-wrap">
+                                <!-- ✏️ MODIFIER -->
+                                <a href="{{ path('secretaire_rdv_edit', {id: rdv.id}) }}"
+                                   class="btn btn-primary btn-sm"
+                                   title="Modifier">
+                                    ✏️
+                                </a>
+
+                                <!-- ✔️ CONFIRMER -->
+                                {% if rdv.statut != constant('App\\Entity\\RendezVous::STATUT_CONFIRME') %}
+                                    <form method="post"
+                                          action="{{ path('secretaire_rdv_confirmer', {id: rdv.id}) }}"
+                                          style="display:inline-block">
+                                        <input type="hidden"
+                                               name="_token"
+                                               value="{{ csrf_token('confirm-rdv-' ~ rdv.id) }}">
+                                        <button class="btn btn-success btn-sm" title="Confirmer">
+                                            ✔️
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <!-- ❌ ANNULER -->
+                                {% if rdv.statut != constant('App\\Entity\\RendezVous::STATUT_ANNULE') %}
+                                    <form method="post"
+                                          action="{{ path('secretaire_rdv_annuler', {id: rdv.id}) }}"
+                                          style="display:inline-block">
+                                        <input type="hidden"
+                                               name="_token"
+                                               value="{{ csrf_token('cancel-rdv-' ~ rdv.id) }}">
+                                        <button class="btn btn-warning btn-sm" title="Annuler">
+                                            ❌
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <!-- 🗑️ SUPPRIMER -->
+                                <form method="post"
+                                      action="{{ path('secretaire_rdv_delete', {id: rdv.id}) }}"
+                                      style="display:inline-block"
+                                      onsubmit="return confirm('Supprimer ce rendez-vous ?')">
+                                    <input type="hidden"
+                                           name="_token"
+                                           value="{{ csrf_token('delete-rdv-' ~ rdv.id) }}">
+                                    <button class="btn btn-danger btn-sm" title="Supprimer">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

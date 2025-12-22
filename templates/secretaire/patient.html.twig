@@ -1,0 +1,669 @@
+{% extends 'secretaire/_layout_secretaire.html.twig' %}
+
+{% block title %}Gestion des Patients{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ================= DESIGN SYSTEM MÉDICAL ================= */
+:root {
+    /* Palette médicale professionnelle */
+    --medical-primary: #0891b2;
+    --medical-primary-hover: #0e7490;
+    --medical-primary-light: #cffafe;
+    
+    --medical-accent: #06b6d4;
+    --medical-success: #10b981;
+    --medical-danger: #dc2626;
+    --medical-warning: #f59e0b;
+    --medical-info: #3b82f6;
+
+    /* Backgrounds médicaux doux */
+    --bg-primary: #f0f9ff;
+    --bg-secondary: #e0f2fe;
+    --bg-card: #ffffff;
+    --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+    
+    /* Textes professionnels */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+
+    /* Bordures subtiles */
+    --border: #cbd5e1;
+    --border-light: #e2e8f0;
+    
+    /* Rayons arrondis médicaux */
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+
+    /* Ombres professionnelles */
+    --shadow-sm: 0 1px 3px rgba(8, 145, 178, 0.08);
+    --shadow-md: 0 4px 12px rgba(8, 145, 178, 0.12);
+    --shadow-lg: 0 8px 24px rgba(8, 145, 178, 0.15);
+    --shadow-hover: 0 12px 32px rgba(8, 145, 178, 0.2);
+
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ================= CONTAINER ================= */
+.container {
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* ================= TITRE PRINCIPAL ================= */
+.container > h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    padding: 2rem 2.5rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--border-light);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.container > h1::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--medical-primary), var(--medical-accent), var(--medical-info));
+    background-size: 200% 100%;
+    animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* ================= ALERTS ================= */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid;
+    animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success { 
+    background: #d1fae5; 
+    color: #065f46; 
+    border-color: #10b981;
+}
+
+.alert-success::before {
+    content: '✓';
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.alert-danger { 
+    background: #fee2e2; 
+    color: #991b1b; 
+    border-color: #dc2626;
+}
+
+.alert-danger::before {
+    content: '✕';
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.alert-warning { 
+    background: #fef3c7; 
+    color: #92400e; 
+    border-color: #f59e0b;
+}
+
+.alert-warning::before {
+    content: '⚠';
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* ================= CARD ================= */
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-light);
+    overflow: hidden;
+    transition: var(--transition);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--medical-primary);
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    border-bottom: 2px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-body {
+    padding: 2.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 2rem;
+}
+
+/* ================= FORM ================= */
+.row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.col-md-6 {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--medical-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+    padding: 0.875rem 1.75rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    justify-content: center;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-success { 
+    background: linear-gradient(135deg, var(--medical-success), #059669); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary { 
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-accent)); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+}
+
+.btn-danger { 
+    background: linear-gradient(135deg, var(--medical-danger), #b91c1c); 
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-secondary { 
+    background: #f1f5f9;
+    color: var(--text-primary);
+    border: 2px solid var(--border);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(8, 145, 178, 0.35);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-sm {
+    padding: 0.625rem 1.125rem;
+    font-size: 0.875rem;
+}
+
+.mt-3 {
+    margin-top: 1rem;
+    margin-right: 0.75rem;
+}
+
+/* ================= TABLE ================= */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-light);
+    animation: fadeIn 0.5s ease;
+}
+
+.table-striped thead {
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    border-bottom: 3px solid var(--medical-primary);
+}
+
+.table thead th {
+    padding: 1rem 0.875rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 1rem 0.875rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.9rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.table-striped tbody tr {
+    transition: var(--transition);
+    background: white;
+}
+
+.table-striped tbody tr:nth-child(even) {
+    background: var(--bg-primary);
+}
+
+.table tbody tr:hover {
+    background: #cffafe !important;
+    transform: scale(1.005);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.text-center {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 3rem 1rem !important;
+}
+
+/* ================= WRAPPER TABLE SCROLL ================= */
+.table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+}
+
+/* ================= ACTIONS ================= */
+.table td form {
+    display: inline-block;
+    margin: 0;
+}
+
+.table td .btn {
+    margin-right: 0.5rem;
+}
+
+.table td .btn:last-child {
+    margin-right: 0;
+}
+
+/* ================= BADGE GENRE ================= */
+.badge-genre {
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.badge-homme {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+.badge-femme {
+    background: #fce7f3;
+    color: #9f1239;
+    border: 1px solid #fbcfe8;
+}
+
+.badge-autre {
+    background: #f3e8ff;
+    color: #6b21a8;
+    border: 1px solid #e9d5ff;
+}
+
+/* ================= GROUPE SANGUIN BADGE ================= */
+.badge-sanguin {
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+    display: inline-block;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .container > h1 {
+        font-size: 1.75rem;
+        padding: 1.5rem;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 1200px;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .mt-3 {
+        margin-right: 0;
+    }
+}
+
+/* ================= SCROLLBAR ================= */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--medical-primary);
+    border-radius: 10px;
+    border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--medical-primary-hover);
+}
+
+/* ================= FORMULAIRE SYMFONY ================= */
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--medical-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+
+.invalid-feedback {
+    color: var(--medical-danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+</style>
+{% endblock %}
+
+{% block secretaire_content %}
+<div class="container">
+    
+    <h1>👩‍⚕️ Gestion des Patients</h1>
+    
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            {{ edit ? '✏️ Modifier le patient' : '➕ Nouveau patient' }}
+        </div>
+        
+        <div class="card-body">
+            {{ form_start(form) }}
+            
+            <div class="row">
+                <div class="col-md-6">{{ form_row(form.prenom) }}</div>
+                <div class="col-md-6">{{ form_row(form.nom) }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">{{ form_row(form.email) }}</div>
+                <div class="col-md-6">{{ form_row(form.telephone) }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">{{ form_row(form.genre) }}</div>
+                <div class="col-md-6">{{ form_row(form.groupeSanguin) }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">{{ form_row(form.adresse) }}</div>
+                <div class="col-md-6">{{ form_row(form.mutuelle) }}</div>
+            </div>
+            
+            <button class="btn btn-success mt-3">
+                {{ edit ? '💾 Enregistrer' : '➕ Créer le patient' }}
+            </button>
+            
+            {% if edit %}
+                <a href="{{ path('secretaire_patients') }}" class="btn btn-secondary mt-3">
+                    Annuler
+                </a>
+            {% endif %}
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+    
+    <div class="table-wrapper">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Genre</th>
+                    <th>Groupe sanguin</th>
+                    <th>Adresse</th>
+                    <th>Mutuelle</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                    <tr>
+                        <td><strong>{{ patient.prenom }}</strong></td>
+                        <td><strong>{{ patient.nom }}</strong></td>
+                        <td>{{ patient.email }}</td>
+                        <td>{{ patient.telephone ?: '—' }}</td>
+                        <td>
+                            {% if patient.genre %}
+                                <span class="badge-genre badge-{{ patient.genre|lower }}">
+                                    {{ patient.genre }}
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if patient.groupeSanguin %}
+                                <span class="badge-sanguin">{{ patient.groupeSanguin }}</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td title="{{ patient.adresse }}">{{ patient.adresse }}</td>
+                        <td>{{ patient.mutuelle ?: '—' }}</td>
+                        <td>
+                            <a href="{{ path('secretaire_patient_edit', {id: patient.id}) }}"
+                               class="btn btn-primary btn-sm"
+                               title="Modifier">✏️</a>
+                            
+                            <form method="post"
+                                  action="{{ path('secretaire_patient_delete', {id: patient.id}) }}"
+                                  style="display:inline-block"
+                                  onsubmit="return confirm('Supprimer ce patient ?')">
+                                <input type="hidden"
+                                       name="_token"
+                                       value="{{ csrf_token('delete-patient-' ~ patient.id) }}">
+                                <button class="btn btn-danger btn-sm" title="Supprimer">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">Aucun patient</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

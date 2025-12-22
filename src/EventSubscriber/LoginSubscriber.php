@@ -29,11 +29,11 @@ class LoginSubscriber implements EventSubscriberInterface
                 throw new AccessDeniedHttpException('Abonnement requis');
             }
         }
+if ($user instanceof Secretaire) {
+    if (!$this->accessService->secretaireHasAccess($user)) {
+        throw new AccessDeniedHttpException('Accès secrétaire désactivé');
+    }
+}
 
-        if ($user instanceof Secretaire) {
-            if (!$this->accessService->secretaireHasAccess($user->getMedecin())) {
-                throw new AccessDeniedHttpException('Accès secrétaire désactivé');
-            }
-        }
     }
 }

@@ -57,8 +57,8 @@ private Collection $specialites;
     #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: MedecinAbonnement::class)]
 private Collection $abonnements;
 
-    #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: Secretaire::class)]
-    private Collection $secretaires;
+#[ORM\OneToMany(mappedBy: 'medecin', targetEntity: Secretaire::class, orphanRemoval: true)]
+private Collection $secretaires;
 
     public function __construct()
     {
@@ -68,6 +68,7 @@ private Collection $abonnements;
         $this->secretaires = new ArrayCollection();
         $this->specialites = new ArrayCollection();
         $this->abonnements = new ArrayCollection();
+        
 
 
         // Rôle par défaut d'un médecin
@@ -269,36 +270,6 @@ public function removeSpecialite(Specialite $specialite): self
         }
         return $this;
     }
-
-
-
-
-    /**
- * @return Collection<int, Secretaire>
- */
-public function getSecretaires(): Collection
-{
-    return $this->secretaires;
-}
-
-public function addSecretaire(Secretaire $secretaire): self
-{
-    if (!$this->secretaires->contains($secretaire)) {
-        $this->secretaires[] = $secretaire;
-        $secretaire->setMedecin($this); // relation inverse
-    }
-    return $this;
-}
-
-public function removeSecretaire(Secretaire $secretaire): self
-{
-    if ($this->secretaires->removeElement($secretaire)) {
-        if ($secretaire->getMedecin() === $this) {
-            $secretaire->setMedecin(null);
-        }
-    }
-    return $this;
-}
 public function getActiveAbonnement(): ?MedecinAbonnement
 {
     foreach ($this->abonnements as $abonnement) {
@@ -317,4 +288,30 @@ public function __toString(): string
 {
     return $this->nom ?? 'Médecin';
 }
+public function getSecretaires(): Collection
+{
+    return $this->secretaires;
+}
+public function addSecretaire(Secretaire $secretaire): self
+{
+    if (!$this->secretaires->contains($secretaire)) {
+        $this->secretaires[] = $secretaire;
+        $secretaire->setMedecin($this); // synchronisation inverse
+    }
+
+    return $this;
+}
+
+public function removeSecretaire(Secretaire $secretaire): self
+{
+    if ($this->secretaires->removeElement($secretaire)) {
+        if ($secretaire->getMedecin() === $this) {
+            $secretaire->setMedecin(null);
+        }
+    }
+
+    return $this;
+}
+
+
 }
