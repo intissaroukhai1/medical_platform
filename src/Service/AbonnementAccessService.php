@@ -45,14 +45,15 @@ class AbonnementAccessService
     /**
      * Une secrétaire a accès si le médecin a un abonnement actif
      */
-   public function secretaireHasAccess(Secretaire $secretaire): bool
+public function secretaireHasAccess(Secretaire $secretaire): bool
 {
-    foreach ($secretaire->getMedecins() as $medecin) {
-        if ($this->medecinHasAccess($medecin)) {
-            return true; // au moins un médecin valide
-        }
+    $medecin = $secretaire->getMedecin();
+
+    if (!$medecin) {
+        return false;
     }
 
-    return false;
+    return $this->medecinHasAccess($medecin);
 }
+
 }

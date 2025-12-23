@@ -1,0 +1,606 @@
+{% extends 'medecin/_layout_medecin.html.twig' %}
+
+{% block title %}Mon Agenda{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .agenda-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 2rem 3rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #0066cc;
+    }
+
+    .page-header h1 {
+        color: #1a1a1a;
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .page-header .icon {
+        font-size: 2.5rem;
+    }
+
+    /* Section Aujourd'hui - Highlight */
+    .today-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .today-section h2 {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .today-empty {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    /* Section Tous les RDV */
+    .all-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .all-section h2 {
+        color: #1a1a1a;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Cards pour les RDV */
+    .rdv-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .today-section .rdv-card {
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .today-section .rdv-card:hover {
+        background: white;
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .all-section .rdv-card {
+        border: 1px solid #e5e7eb;
+    }
+
+    .all-section .rdv-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .rdv-time {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #f0f4ff;
+        border-radius: 8px;
+        min-width: 100px;
+    }
+
+    .rdv-time .date {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .rdv-time .hour {
+        font-size: 1.3rem;
+        color: #0066cc;
+        font-weight: 700;
+        margin-top: 0.25rem;
+    }
+
+    .rdv-patient {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .rdv-patient .name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .rdv-patient .mode {
+        font-size: 0.9rem;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .rdv-patient .mode-icon {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        background: #e5e7eb;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .rdv-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-confirme {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .rdv-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        padding: 0.5rem 0.75rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-details {
+        background: #0066cc;
+        color: white;
+    }
+
+    .btn-details:hover {
+        background: #0052a3;
+        transform: scale(1.05);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .empty-state .icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .stats-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 200px;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-card .label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0066cc;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #666;
+        min-width: 150px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-value {
+        color: #1a1a1a;
+        flex: 1;
+    }
+
+    .detail-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .badge-confirme {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-presentiel {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .badge-video {
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .rdv-card {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .rdv-time {
+            flex-direction: row;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .modal-content {
+            width: 95%;
+            max-height: 90vh;
+        }
+
+        .detail-row {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="agenda-container">
+    <div class="page-header">
+        <span class="icon">📅</span>
+        <h1>Mon Agenda</h1>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="label">Aujourd'hui</div>
+            <div class="value">{{ rdvsToday|length }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Total confirmés</div>
+            <div class="value">{{ rdvsAll|length }}</div>
+        </div>
+    </div>
+
+    <!-- Section Aujourd'hui -->
+    <section class="today-section">
+        <h2>
+            <span>🔔</span>
+            Rendez-vous d'aujourd'hui
+        </h2>
+
+        {% if rdvsToday is empty %}
+            <div class="today-empty">
+                ✨ Aucun rendez-vous aujourd'hui
+            </div>
+        {% else %}
+            {% for rdv in rdvsToday %}
+                <div class="rdv-card">
+                    <div class="rdv-time">
+                        <span class="date">{{ rdv.date|date('d/m/Y') }}</span>
+                        <span class="hour">{{ rdv.date|date('H:i') }}</span>
+                    </div>
+                    
+                    <div class="rdv-patient">
+                        <span class="name">{{ rdv.patient.prenom }} {{ rdv.patient.nom }}</span>
+                        <span class="mode">
+                            {% if rdv.mode == 'presentiel' %}
+                                <span class="mode-icon">🏥 Présentiel</span>
+                            {% elseif rdv.mode == 'video' %}
+                                <span class="mode-icon">💻 Vidéo</span>
+                            {% else %}
+                                <span class="mode-icon">{{ rdv.mode }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="rdv-status status-confirme">
+                        ✅ Confirmé
+                    </div>
+
+                    <div class="rdv-actions">
+                        <button class="btn-action btn-details" onclick="openModal('{{ rdv.id }}', '{{ rdv.patient.prenom }} {{ rdv.patient.nom }}', '{{ rdv.date|date('d/m/Y') }}', '{{ rdv.date|date('H:i') }}', '{{ rdv.mode }}', '{{ rdv.statut }}', '{{ rdv.patient.email|default('Non renseigné') }}', '{{ rdv.patient.telephone|default('Non renseigné') }}')">
+                            Voir détails
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </section>
+
+    <!-- Section Tous les RDV confirmés -->
+    <section class="all-section">
+        <h2>
+            <span>📋</span>
+            Tous les rendez-vous confirmés
+        </h2>
+
+        {% if rdvsAll is empty %}
+            <div class="empty-state">
+                <div class="icon">📭</div>
+                <p>Aucun rendez-vous confirmé pour le moment</p>
+            </div>
+        {% else %}
+            {% for rdv in rdvsAll %}
+                <div class="rdv-card">
+                    <div class="rdv-time">
+                        <span class="date">{{ rdv.date|date('d/m/Y') }}</span>
+                        <span class="hour">{{ rdv.date|date('H:i') }}</span>
+                    </div>
+                    
+                    <div class="rdv-patient">
+                        <span class="name">{{ rdv.patient.prenom }} {{ rdv.patient.nom }}</span>
+                        <span class="mode">
+                            {% if rdv.mode == 'presentiel' %}
+                                <span class="mode-icon">🏥 Présentiel</span>
+                            {% elseif rdv.mode == 'video' %}
+                                <span class="mode-icon">💻 Vidéo</span>
+                            {% else %}
+                                <span class="mode-icon">{{ rdv.mode }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="rdv-status status-confirme">
+                        ✅ Confirmé
+                    </div>
+
+                    <div class="rdv-actions">
+                        <button class="btn-action btn-details" onclick="openModal('{{ rdv.id }}', '{{ rdv.patient.prenom }} {{ rdv.patient.nom }}', '{{ rdv.date|date('d/m/Y') }}', '{{ rdv.date|date('H:i') }}', '{{ rdv.mode }}', '{{ rdv.statut }}', '{{ rdv.patient.email|default('Non renseigné') }}', '{{ rdv.patient.telephone|default('Non renseigné') }}')">
+                            Voir détails
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </section>
+</div>
+
+<!-- Modal Détails RDV -->
+<div id="rdvModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📋 Détails du rendez-vous</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-row">
+                <div class="detail-label">👤 Patient</div>
+                <div class="detail-value" id="modal-patient"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">📅 Date</div>
+                <div class="detail-value" id="modal-date"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">🕐 Heure</div>
+                <div class="detail-value" id="modal-heure"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">💼 Mode</div>
+                <div class="detail-value">
+                    <span class="detail-badge" id="modal-mode"></span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">✅ Statut</div>
+                <div class="detail-value">
+                    <span class="detail-badge badge-confirme" id="modal-statut">Confirmé</span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">📧 Email</div>
+                <div class="detail-value" id="modal-email"></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">📞 Téléphone</div>
+                <div class="detail-value" id="modal-telephone"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openModal(id, patient, date, heure, mode, statut, email, telephone) {
+    document.getElementById('modal-patient').textContent = patient;
+    document.getElementById('modal-date').textContent = date;
+    document.getElementById('modal-heure').textContent = heure;
+    document.getElementById('modal-email').textContent = email;
+    document.getElementById('modal-telephone').textContent = telephone;
+    
+    // Mode
+    const modeElement = document.getElementById('modal-mode');
+    if (mode === 'presentiel') {
+        modeElement.textContent = '🏥 Présentiel';
+        modeElement.className = 'detail-badge badge-presentiel';
+    } else if (mode === 'video') {
+        modeElement.textContent = '💻 Vidéo';
+        modeElement.className = 'detail-badge badge-video';
+    } else {
+        modeElement.textContent = mode;
+        modeElement.className = 'detail-badge';
+    }
+    
+    document.getElementById('rdvModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('rdvModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Fermer avec Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// Fermer en cliquant en dehors
+document.getElementById('rdvModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

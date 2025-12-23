@@ -47,6 +47,8 @@ security:
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/secretaire/activate, roles: PUBLIC_ACCESS }
+
 
         # Protected API
         - { path: ^/api, roles: ROLE_USER }
@@ -64,4 +66,4 @@ security:
         
         - { path: ^/specialites, roles: [ROLE_ADMIN, ROLE_MEDECIN] }
         - { path: ^/abonnements, roles: ROLE_ADMIN }
-        - { path: ^/medecin, roles: ROLE_ADMIN }
+        

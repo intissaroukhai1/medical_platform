@@ -89,4 +89,36 @@ class RendezVousRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findAcceptedByMedecin(Medecin $medecin): array
+{
+    return $this->createQueryBuilder('r')
+        ->andWhere('r.medecin = :medecin')
+        ->andWhere('r.statut = :statut')
+        ->setParameter('medecin', $medecin)
+->setParameter('statut', RendezVous::STATUT_CONFIRME)
+        ->orderBy('r.date', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
+/**
+ * 📅 RDV acceptés du jour (dashboard médecin)
+ */
+public function findTodayAcceptedByMedecin(Medecin $medecin): array
+{
+    $start = new \DateTime('today 00:00');
+    $end   = new \DateTime('today 23:59');
+
+    return $this->createQueryBuilder('r')
+        ->andWhere('r.medecin = :medecin')
+        ->andWhere('r.statut = :statut')
+        ->andWhere('r.date BETWEEN :start AND :end')
+        ->setParameter('medecin', $medecin)
+        ->setParameter('statut', RendezVous::STATUT_CONFIRME)
+        ->setParameter('start', $start)
+        ->setParameter('end', $end)
+        ->orderBy('r.date', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
+
 }

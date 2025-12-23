@@ -94,41 +94,14 @@ public function index(): Response
             $prenom,
             $token
         );
+      
+
 
         $this->addFlash('success', 'Secrétaire ajoutée, email envoyé.');
         return $this->redirectToRoute('medecin_secretaires');
     }
 
-    // 🔐 Activation compte
-    #[Route('/secretaire/activate/{token}', name: 'secretaire_activate')]
-    public function activate(
-        string $token,
-        Request $request,
-        SecretaireRepository $repo,
-        UserPasswordHasherInterface $hasher
-    ): Response {
-        $secretaire = $repo->findOneBy(['activationToken' => $token]);
-
-        if (!$secretaire) {
-            throw $this->createNotFoundException();
-        }
-
-        if ($request->isMethod('POST')) {
-            $password = $request->request->get('password');
-
-            $secretaire->setPassword(
-                $hasher->hashPassword($secretaire, $password)
-            );
-            $secretaire->setActivationToken(null);
-            $secretaire->setActif(true);
-
-            $this->em->flush();
-
-            return $this->redirectToRoute('app_login');
-        }
-
-        return $this->render('security/secretaire_activate.html.twig');
-    }
+   
     #[Route('/{id}/toggle', name: 'medecin_secretaire_toggle', methods: ['POST'])]
 public function toggleSecretaire(Secretaire $secretaire): RedirectResponse
 {

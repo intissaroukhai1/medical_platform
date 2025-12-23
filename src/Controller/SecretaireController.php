@@ -23,16 +23,16 @@ class SecretaireController extends AbstractController
         }
 
         // 🔥 RÈGLE MÉTIER PRINCIPALE
-        $medecin = $secretaire->getMedecin();
+       $medecin = $secretaire->getMedecin();
 
-        if (!$abonnementAccess->secretaireHasAccess($medecin)) {
-            $this->addFlash(
-                'danger',
-                'L’accès est désactivé : le médecin n’a pas d’abonnement actif.'
-            );
+if (!$medecin || !$abonnementAccess->medecinHasAccess($medecin)) {
+    $this->addFlash(
+        'danger',
+        'L’accès est désactivé : le médecin n’a pas d’abonnement actif.'
+    );
 
-            return $this->redirectToRoute('app_logout');
-        }
+    return $this->redirectToRoute('app_logout');
+}
 
         return $this->render('secretaire/dashboard.html.twig', [
             'secretaire' => $secretaire,

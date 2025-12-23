@@ -13,6 +13,9 @@ class Patient extends User
 {
     #[ORM\Column(type: 'string', length: 20)]
     private ?string $numeroCIN = null;
+    #[ORM\ManyToOne(targetEntity: Medecin::class, inversedBy: 'patients')]
+#[ORM\JoinColumn(nullable: true)]
+private ?Medecin $medecin = null;
 
     #[ORM\Column(type: 'string', length: 10)]
     private ?string $genre = null;
@@ -66,22 +69,32 @@ private ?float $longitude = null;
     /** @return Collection<int, RendezVous> */
     public function getRendezVous(): Collection { return $this->rendezVous; }
 
-    public function addRendezVou(RendezVous $rv): self
-    {
-        if (!$this->rendezVous->contains($rv)) {
-            $this->rendezVous[] = $rv;
-            $rv->setPatient($this);
-        }
-        return $this;
+   public function addRendezVous(RendezVous $rv): self
+{
+    if (!$this->rendezVous->contains($rv)) {
+        $this->rendezVous[] = $rv;
+        $rv->setPatient($this);
     }
+    return $this;
+}
 
-    public function removeRendezVou(RendezVous $rv): self
-    {
-        if ($this->rendezVous->removeElement($rv)) {
-            if ($rv->getPatient() === $this) {
-                $rv->setPatient(null);
-            }
+public function removeRendezVous(RendezVous $rv): self
+{
+    if ($this->rendezVous->removeElement($rv)) {
+        if ($rv->getPatient() === $this) {
+            $rv->setPatient(null);
         }
-        return $this;
     }
+    return $this;
+}
+    public function getMedecin(): ?Medecin
+{
+    return $this->medecin;
+}
+
+public function setMedecin(?Medecin $medecin): self
+{
+    $this->medecin = $medecin;
+    return $this;
+}
 }

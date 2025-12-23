@@ -25,37 +25,45 @@ class SecretairePatientController extends AbstractController
         UserPasswordHasherInterface $passwordHasher
     ): Response {
 
-        $patient = new Patient();
+        /** @var \App\Entity\Secretaire $secretaire */
+        $secretaire = $this->getUser();
+        $medecin = $secretaire->getMedecin();
 
+        if (!$medecin) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $patient = new Patient();
         $form = $this->createForm(SecretairePatientType::class, $patient);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-                $patient->setNumeroCin('TEMP-' . uniqid());
 
-            // 🔐 Mot de passe temporaire (obligatoire pour Doctrine)
+            // ⚠️ temporaire (à améliorer plus tard)
+            $patient->setNumeroCin('TEMP-' . uniqid());
+
+            // 🔐 mot de passe temporaire
             $temporaryPassword = bin2hex(random_bytes(10));
-
             $patient->setPassword(
                 $passwordHasher->hashPassword($patient, $temporaryPassword)
             );
 
-            // 👤 Rôle patient
+            // 👤 rôle
             $patient->setRoles(['ROLE_PATIENT']);
+
+            // 🔥 liaison OBLIGATOIRE
+            $patient->setMedecin($medecin);
 
             $em->persist($patient);
             $em->flush();
 
-            $this->addFlash(
-                'success',
-                'Patient ajouté avec succès ✅'
-            );
+            $this->addFlash('success', 'Patient ajouté avec succès ✅');
 
             return $this->redirectToRoute('secretaire_patients');
         }
 
         return $this->render('secretaire/patient.html.twig', [
-            'patients' => $repo->findAll(),
+            'patients' => $repo->findPatientsForSecretaireMedecin($medecin),
             'form'     => $form->createView(),
             'edit'     => null,
         ]);
@@ -69,6 +77,14 @@ class SecretairePatientController extends AbstractController
         EntityManagerInterface $em
     ): Response {
 
+        /** @var \App\Entity\Secretaire $secretaire */
+        $secretaire = $this->getUser();
+        $medecin = $secretaire->getMedecin();
+
+        if (!$medecin || $patient->getMedecin() !== $medecin) {
+            throw $this->createAccessDeniedException();
+        }
+
         $form = $this->createForm(SecretairePatientType::class, $patient);
         $form->handleRequest($request);
 
@@ -76,12 +92,11 @@ class SecretairePatientController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Patient modifié avec succès ✏️');
-
             return $this->redirectToRoute('secretaire_patients');
         }
 
         return $this->render('secretaire/patient.html.twig', [
-            'patients' => $repo->findAll(),
+            'patients' => $repo->findPatientsForSecretaireMedecin($medecin),
             'form'     => $form->createView(),
             'edit'     => $patient,
         ]);

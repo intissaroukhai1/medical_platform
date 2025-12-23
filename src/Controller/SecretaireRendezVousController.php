@@ -38,16 +38,15 @@ class SecretaireRendezVousController extends AbstractController
         }
 
         // 🔹 Liste des RDV du médecin
-        $rendezvous = $repo->findBy(
-            ['medecin' => $medecin],
-            ['date' => 'DESC']
-        );
+       $rendezvous = $repo->findEnAttenteByMedecin($medecin);
 
         // 🔹 Nouveau RDV
         $rendezVous = new RendezVous();
         $rendezVous->setMedecin($medecin);
 
-        $form = $this->createForm(SecretaireRendezVousType::class, $rendezVous);
+      $form = $this->createForm(SecretaireRendezVousType::class, $rendezVous, [
+    'medecin' => $medecin,
+]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -105,10 +104,7 @@ class SecretaireRendezVousController extends AbstractController
         }
 
         return $this->render('secretaire/rendezvous.html.twig', [
-            'rendezvous' => $repo->findBy(
-                ['medecin' => $medecin],
-                ['date' => 'DESC']
-            ),
+            'rendezvous' => $repo->findEnAttenteByMedecin($medecin),
             'form'    => $form->createView(),
             'editRdv' => $rendezVous,
         ]);
@@ -118,57 +114,82 @@ class SecretaireRendezVousController extends AbstractController
      * ANNULATION
      */
     #[Route('/rendez-vous/{id}/annuler', name: 'secretaire_rdv_annuler', methods: ['POST'])]
-    public function annuler(
-        RendezVous $rendezVous,
-        Request $request,
-        EntityManagerInterface $em
-    ): Response {
+public function annuler(
+    RendezVous $rendezVous,
+    Request $request,
+    EntityManagerInterface $em
+): Response {
 
-        if (!$this->isCsrfTokenValid(
-            'cancel-rdv-' . $rendezVous->getId(),
-            $request->request->get('_token')
-        )) {
-            throw $this->createAccessDeniedException();
-        }
+    /** @var Secretaire $secretaire */
+    $secretaire = $this->getUser();
+    $medecin = $secretaire->getMedecin();
 
-        $rendezVous->setStatut(RendezVous::STATUT_ANNULE);
-        $em->flush();
-
-        $this->addFlash('warning', 'Rendez-vous annulé ⚠️');
-
-        return $this->redirectToRoute('secretaire_rendez_vous');
+    if ($rendezVous->getMedecin() !== $medecin) {
+        throw $this->createAccessDeniedException();
     }
+
+    if (!$this->isCsrfTokenValid(
+        'cancel-rdv-' . $rendezVous->getId(),
+        $request->request->get('_token')
+    )) {
+        throw $this->createAccessDeniedException();
+    }
+
+    $rendezVous->setStatut(RendezVous::STATUT_ANNULE);
+    $em->flush();
+
+    $this->addFlash('warning', 'Rendez-vous annulé ⚠️');
+
+    return $this->redirectToRoute('secretaire_rendez_vous');
+}
 
     /**
      * SUPPRESSION
      */
-    #[Route('/rendez-vous/{id}/delete', name: 'secretaire_rdv_delete', methods: ['POST'])]
-    public function delete(
-        RendezVous $rendezVous,
-        Request $request,
-        EntityManagerInterface $em
-    ): Response {
+   #[Route('/rendez-vous/{id}/delete', name: 'secretaire_rdv_delete', methods: ['POST'])]
+public function delete(
+    RendezVous $rendezVous,
+    Request $request,
+    EntityManagerInterface $em
+): Response {
 
-        if (!$this->isCsrfTokenValid(
-            'delete-rdv-' . $rendezVous->getId(),
-            $request->request->get('_token')
-        )) {
-            throw $this->createAccessDeniedException();
-        }
+    /** @var Secretaire $secretaire */
+    $secretaire = $this->getUser();
+    $medecin = $secretaire->getMedecin();
 
-        $em->remove($rendezVous);
-        $em->flush();
-
-        $this->addFlash('danger', 'Rendez-vous supprimé 🗑️');
-
-        return $this->redirectToRoute('secretaire_rendez_vous');
+    if ($rendezVous->getMedecin() !== $medecin) {
+        throw $this->createAccessDeniedException();
     }
-    #[Route('/rendez-vous/{id}/confirmer', name: 'secretaire_rdv_confirmer', methods: ['POST'])]
+
+    if (!$this->isCsrfTokenValid(
+        'delete-rdv-' . $rendezVous->getId(),
+        $request->request->get('_token')
+    )) {
+        throw $this->createAccessDeniedException();
+    }
+
+    $em->remove($rendezVous);
+    $em->flush();
+
+    $this->addFlash('danger', 'Rendez-vous supprimé 🗑️');
+
+    return $this->redirectToRoute('secretaire_rendez_vous');
+}
+
+   #[Route('/rendez-vous/{id}/confirmer', name: 'secretaire_rdv_confirmer', methods: ['POST'])]
 public function confirmer(
     RendezVous $rendezVous,
     Request $request,
     EntityManagerInterface $em
 ): Response {
+    /** @var Secretaire $secretaire */
+    $secretaire = $this->getUser();
+    $medecin = $secretaire->getMedecin();
+
+    if ($rendezVous->getMedecin() !== $medecin) {
+        throw $this->createAccessDeniedException();
+    }
+
     if (!$this->isCsrfTokenValid(
         'confirm-rdv-' . $rendezVous->getId(),
         $request->request->get('_token')
@@ -182,6 +203,4 @@ public function confirmer(
     $this->addFlash('success', 'Rendez-vous confirmé ✅');
 
     return $this->redirectToRoute('secretaire_rendez_vous');
-}
-
-}
+}}
