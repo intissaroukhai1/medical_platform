@@ -1,0 +1,508 @@
+{% extends 'medecin/_layout_medecin.html.twig' %}
+
+{% block title %}
+    {% if form is defined %}
+        Créer une ordonnance
+    {% else %}
+        Ordonnances du rendez-vous
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .ordonnance-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #10b981;
+    }
+
+    .page-header h1 {
+        color: #1a1a1a;
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .btn-back {
+        background: #6b7280;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-back:hover {
+        background: #4b5563;
+        transform: translateX(-3px);
+    }
+
+    /* Section Info Patient */
+    .patient-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .patient-info h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .patient-info p {
+        margin: 0.25rem 0;
+        font-size: 1rem;
+        opacity: 0.95;
+    }
+
+    /* Formulaire de création */
+    .form-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-group textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        resize: vertical;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 0.875rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Liste des ordonnances */
+    .ordonnances-list {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .ordonnance-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #10b981;
+        transition: all 0.3s ease;
+    }
+
+    .ordonnance-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .ordonnance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f3f4f6;
+    }
+
+    .ordonnance-date {
+        font-weight: 600;
+        color: #374151;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ordonnance-content {
+        background: #f9fafb;
+        padding: 1.25rem;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #1f2937;
+        white-space: pre-wrap;
+        margin-bottom: 1rem;
+    }
+
+    .ordonnance-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-view {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #2563eb;
+        transform: scale(1.05);
+    }
+
+    .btn-edit {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #d97706;
+        transform: scale(1.05);
+    }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+        transform: scale(1.05);
+    }
+
+    .btn-print {
+        background: #8b5cf6;
+        color: white;
+    }
+
+    .btn-print:hover {
+        background: #7c3aed;
+        transform: scale(1.05);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6b7280;
+    }
+
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-create-new {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-create-new:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Alert Messages */
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid #10b981;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+    }
+
+    .alert-info {
+        background: #dbeafe;
+        color: #1e40af;
+        border-left: 4px solid #3b82f6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ordonnance-container {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .ordonnance-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .ordonnance-actions {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .btn-action {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ordonnance-container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>
+            <span>💊</span>
+            {% if form is defined %}
+                Créer une ordonnance
+            {% else %}
+                Ordonnances du rendez-vous
+            {% endif %}
+        </h1>
+        <a href="{{ path('medecin_agenda') }}" class="btn-back">
+            ← Retour à l'agenda
+        </a>
+    </div>
+
+    <!-- Messages Flash -->
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            <span>✅</span>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            <span>❌</span>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('info') %}
+        <div class="alert alert-info">
+            <span>ℹ️</span>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Info Patient -->
+    {% if rdv is defined %}
+        <div class="patient-info">
+            <h2>👤 {{ rdv.patient.prenom }} {{ rdv.patient.nom }}</h2>
+            <p>📅 Rendez-vous du {{ rdv.date|date('d/m/Y à H:i') }}</p>
+            <p>📧 {{ rdv.patient.email|default('Non renseigné') }}</p>
+            <p>📞 {{ rdv.patient.telephone|default('Non renseigné') }}</p>
+        </div>
+    {% endif %}
+
+    <!-- Formulaire de création (uniquement si form existe) -->
+    {% if form is defined %}
+        <div class="form-container">
+            {{ form_start(form) }}
+
+            <div class="form-group">
+                {{ form_label(form.contenu, '📝 Contenu de l\'ordonnance') }}
+                {{ form_widget(form.contenu, {
+                    'attr': {
+                        'placeholder': 'Exemple:\n\n1. Paracétamol 1000mg\n   - 1 comprimé 3 fois par jour\n   - Pendant 5 jours\n\n2. Ibuprofène 400mg\n   - 1 comprimé si douleur\n   - Maximum 3 par jour\n\nRecommandations:\n- Prendre pendant les repas\n- Bien s\'hydrater'
+                    }
+                }) }}
+                {{ form_errors(form.contenu) }}
+            </div>
+
+            <button type="submit" class="btn-success">
+                💾 Enregistrer l'ordonnance
+            </button>
+
+            {{ form_end(form) }}
+        </div>
+    {% endif %}
+
+    <!-- Liste des ordonnances (uniquement si on est en mode "voir") -->
+    {% if form is not defined and ordonnances is defined %}
+        {% if ordonnances is empty %}
+            <div class="empty-state">
+                <div class="icon">📋</div>
+                <p>Aucune ordonnance créée pour ce rendez-vous</p>
+                {% if rdv is defined %}
+                    <a href="{{ path('medecin_ordonnance_new', {id: rdv.id}) }}" class="btn-create-new">
+                        ➕ Créer une ordonnance
+                    </a>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="ordonnances-list">
+                {% for ordonnance in ordonnances %}
+                    <div class="ordonnance-card">
+                        <div class="ordonnance-header">
+                            <div class="ordonnance-date">
+                                📅 Créée le {{ ordonnance.createdAt|date('d/m/Y à H:i') }}
+                            </div>
+                        </div>
+
+                        <div class="ordonnance-content">
+                            {{ ordonnance.contenu }}
+                        </div>
+
+                        <div class="ordonnance-actions">
+                            <button class="btn-action btn-print" onclick="printOrdonnance({{ ordonnance.id }})">
+                                🖨️ Imprimer
+                            </button>
+                            <a href="{{ path('medecin_ordonnance_edit', {id: ordonnance.id}) }}" class="btn-action btn-edit">
+                                ✏️ Modifier
+                            </a>
+                            <form method="post"
+      action="{{ path('medecin_ordonnance_delete', {id: ordonnance.id}) }}"
+      onsubmit="return confirm('⚠️ Supprimer définitivement cette ordonnance ?');"
+      style="display:inline">
+
+    <input type="hidden" name="_token"
+           value="{{ csrf_token('delete_ordonnance_' ~ ordonnance.id) }}">
+
+    <button type="submit" class="btn-action btn-delete">
+        🗑️ Supprimer
+    </button>
+</form>
+
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if rdv is defined %}
+                <div style="margin-top: 2rem; text-align: center;">
+                    <a href="{{ path('medecin_ordonnance_new', {id: rdv.id}) }}" class="btn-create-new">
+                        ➕ Créer une nouvelle ordonnance
+                    </a>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+function printOrdonnance(id) {
+    // Rediriger vers une page d'impression ou ouvrir dans une nouvelle fenêtre
+    window.open(`/medecin/ordonnance/print/${id}`, '_blank');
+}
+
+function confirmDelete(id) {
+    if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cette ordonnance ?\n\nCette action est irréversible.')) {
+        // Créer un formulaire de suppression
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/medecin/ordonnance/delete/${id}`;
+        
+        // Ajouter le token CSRF si nécessaire
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_token';
+            input.value = csrfToken.content;
+            form.appendChild(input);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

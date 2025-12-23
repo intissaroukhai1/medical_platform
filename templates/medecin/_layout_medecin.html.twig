@@ -661,12 +661,7 @@
                     📅 Mon Agenda
                 </a>
             </li>
-            <li>
-                <a href="{{ path('medecin_patients') }}" 
-                   class="{{ app.request.attributes.get('_route') starts with 'medecin_patients' ? 'active' : '' }}">
-                    👥 Mes Patients
-                </a>
-            </li>
+            
              <li>
     <a href="{{ path('medecin_secretaires') }}"
        class="{{ app.request.attributes.get('_route') starts with 'medecin_secretaire' ? 'active' : '' }}">
@@ -675,12 +670,7 @@
 </li>
 
 
-            <li>
-                <a href="{{ path('medecin_ordonnances') }}" 
-                   class="{{ app.request.attributes.get('_route') starts with 'medecin_ordonnances' ? 'active' : '' }}">
-                    💊 Ordonnances
-                </a>
-            </li>
+        
             <li>
    <a href="{{ path('medecin_disponibilite') }}"
    class="{{ app.request.attributes.get('_route') == 'medecin_disponibilite' ? 'active' : '' }}">

@@ -356,6 +356,57 @@
         color: #4338ca;
     }
 
+    /* Nouveaux styles pour les boutons d'actions médicales */
+    .rdv-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e5e7eb;
+    }
+
+    .rdv-modal-actions .btn-action {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .rdv-modal-actions .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #btn-ordonnance {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    #btn-ordonnance:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    #btn-voir-ordonnance {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    #btn-voir-ordonnance:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    }
+
+    #btn-dossier {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+    }
+
+    #btn-dossier:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -397,6 +448,14 @@
 
         .detail-label {
             min-width: auto;
+        }
+
+        .rdv-modal-actions {
+            flex-direction: column;
+        }
+
+        .rdv-modal-actions .btn-action {
+            width: 100%;
         }
     }
 </style>
@@ -458,9 +517,20 @@
                     </div>
 
                     <div class="rdv-actions">
-                        <button class="btn-action btn-details" onclick="openModal('{{ rdv.id }}', '{{ rdv.patient.prenom }} {{ rdv.patient.nom }}', '{{ rdv.date|date('d/m/Y') }}', '{{ rdv.date|date('H:i') }}', '{{ rdv.mode }}', '{{ rdv.statut }}', '{{ rdv.patient.email|default('Non renseigné') }}', '{{ rdv.patient.telephone|default('Non renseigné') }}')">
-                            Voir détails
-                        </button>
+                        <button class="btn-action btn-details" 
+                         onclick="openModal(
+    {{ rdv.id }},
+    {{ rdv.patient.id }},
+    '{{ rdv.patient.prenom }} {{ rdv.patient.nom }}',
+    '{{ rdv.date|date('d/m/Y') }}',
+    '{{ rdv.date|date('H:i') }}',
+    '{{ rdv.mode }}',
+    '{{ rdv.statut }}',
+    '{{ rdv.patient.email|default('Non renseigné') }}',
+    '{{ rdv.patient.telephone|default('Non renseigné') }}'
+)">
+    Voir détails
+</button>
                     </div>
                 </div>
             {% endfor %}
@@ -505,7 +575,17 @@
                     </div>
 
                     <div class="rdv-actions">
-                        <button class="btn-action btn-details" onclick="openModal('{{ rdv.id }}', '{{ rdv.patient.prenom }} {{ rdv.patient.nom }}', '{{ rdv.date|date('d/m/Y') }}', '{{ rdv.date|date('H:i') }}', '{{ rdv.mode }}', '{{ rdv.statut }}', '{{ rdv.patient.email|default('Non renseigné') }}', '{{ rdv.patient.telephone|default('Non renseigné') }}')">
+                        <button class="btn-action btn-details" onclick="openModal(
+    {{ rdv.id }},
+    {{ rdv.patient.id }},
+    '{{ rdv.patient.prenom }} {{ rdv.patient.nom }}',
+    '{{ rdv.date|date('d/m/Y') }}',
+    '{{ rdv.date|date('H:i') }}',
+    '{{ rdv.mode }}',
+    '{{ rdv.statut }}',
+    '{{ rdv.patient.email|default('Non renseigné') }}',
+    '{{ rdv.patient.telephone|default('Non renseigné') }}'
+)"
                             Voir détails
                         </button>
                     </div>
@@ -555,19 +635,51 @@
                 <div class="detail-label">📞 Téléphone</div>
                 <div class="detail-value" id="modal-telephone"></div>
             </div>
+
+            <!-- Nouveaux boutons d'actions médicales -->
+            <div class="rdv-modal-actions">
+                <a id="btn-ordonnance" href="#" class="btn-action">
+                    💊 Créer ordonnance
+                </a>
+                <a id="btn-voir-ordonnance" href="#" class="btn-action">
+                    📄 Voir ordonnance
+                </a>
+            <a id="btn-dossier" href="#" class="btn-action btn-dossier">
+    🧠 Dossier médical
+</a>
+
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function openModal(id, patient, date, heure, mode, statut, email, telephone) {
+function openModal(
+    rdvId,
+    patientId,
+    patient,
+    date,
+    heure,
+    mode,
+    statut,
+    email,
+    telephone
+) {
     document.getElementById('modal-patient').textContent = patient;
     document.getElementById('modal-date').textContent = date;
     document.getElementById('modal-heure').textContent = heure;
     document.getElementById('modal-email').textContent = email;
     document.getElementById('modal-telephone').textContent = telephone;
-    
-    // Mode
+
+    document.getElementById('btn-ordonnance').href =
+        `/medecin/ordonnance/new/${rdvId}`;
+
+    document.getElementById('btn-voir-ordonnance').href =
+        `/medecin/ordonnance/rdv/${rdvId}`;
+
+    document.getElementById('btn-dossier').href =
+        `/medecin/patient/${patientId}/dossier`;
+
     const modeElement = document.getElementById('modal-mode');
     if (mode === 'presentiel') {
         modeElement.textContent = '🏥 Présentiel';
@@ -579,10 +691,11 @@ function openModal(id, patient, date, heure, mode, statut, email, telephone) {
         modeElement.textContent = mode;
         modeElement.className = 'detail-badge';
     }
-    
+
     document.getElementById('rdvModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
+
 
 function closeModal() {
     document.getElementById('rdvModal').classList.remove('active');

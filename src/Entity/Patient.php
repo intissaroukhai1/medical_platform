@@ -37,11 +37,14 @@ private ?float $longitude = null;
 
     #[ORM\OneToMany(mappedBy: 'patient', targetEntity: RendezVous::class)]
     private Collection $rendezVous;
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Ordonnance::class, orphanRemoval: true)]
+private Collection $ordonnances;
 
     public function __construct()
     {
         parent::__construct();
         $this->rendezVous = new ArrayCollection();
+           $this->ordonnances = new ArrayCollection(); // ✅ AJOUT
         $this->setRoles(['ROLE_PATIENT']);
     }
 
@@ -97,4 +100,12 @@ public function setMedecin(?Medecin $medecin): self
     $this->medecin = $medecin;
     return $this;
 }
+/**
+ * @return Collection<int, Ordonnance>
+ */
+public function getOrdonnances(): Collection
+{
+    return $this->ordonnances;
+}
+
 }

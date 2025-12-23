@@ -1,0 +1,326 @@
+{% extends 'medecin/_layout_medecin.html.twig' %}
+
+{% block title %}Dossier médical – {{ patient.prenom }} {{ patient.nom }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ================= CONTENEUR PRINCIPAL ================= */
+.dossier-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+    min-height: 100vh;
+}
+
+.dossier-container h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ================= CARTE PATIENT ================= */
+.patient-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.patient-info::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.patient-info h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.patient-info p {
+    font-size: 1.125rem;
+    margin: 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.95;
+    position: relative;
+}
+
+/* ================= SÉPARATEUR ================= */
+.dossier-container hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+    margin: 2.5rem 0;
+}
+
+/* ================= TITRES SECTIONS ================= */
+.dossier-container h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid #667eea;
+    width: fit-content;
+}
+
+/* ================= LISTES ================= */
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list li {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    border-radius: 12px 0 0 12px;
+    transition: width 0.3s ease;
+}
+
+.list li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 15px rgba(102, 126, 234, 0.15);
+    border-left-color: #764ba2;
+}
+
+.list li:hover::before {
+    width: 6px;
+}
+
+.list li strong {
+    color: #667eea;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.list li.empty {
+    background: #f7fafc;
+    border-left-color: #cbd5e0;
+    color: #718096;
+    font-style: italic;
+    justify-content: center;
+}
+
+.list li.empty:hover {
+    transform: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ================= BADGES STATUT ================= */
+.badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-confirme {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+}
+
+.badge-en_attente {
+    background: linear-gradient(135deg, #ed8936, #dd6b20);
+    color: white;
+}
+
+.badge-annule {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    color: white;
+}
+
+.badge-termine {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+}
+
+/* ================= ANIMATIONS ================= */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dossier-container > * {
+    animation: fadeIn 0.6s ease-out backwards;
+}
+
+.dossier-container > *:nth-child(1) { animation-delay: 0.1s; }
+.dossier-container > *:nth-child(2) { animation-delay: 0.2s; }
+.dossier-container > *:nth-child(3) { animation-delay: 0.3s; }
+.dossier-container > *:nth-child(4) { animation-delay: 0.4s; }
+.dossier-container > *:nth-child(5) { animation-delay: 0.5s; }
+.dossier-container > *:nth-child(6) { animation-delay: 0.6s; }
+.dossier-container > *:nth-child(7) { animation-delay: 0.7s; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .dossier-container {
+        padding: 1rem;
+    }
+    
+    .dossier-container h1 {
+        font-size: 1.875rem;
+    }
+    
+    .patient-info {
+        padding: 1.5rem;
+    }
+    
+    .patient-info h2 {
+        font-size: 1.5rem;
+    }
+    
+    .patient-info p {
+        font-size: 1rem;
+    }
+    
+    .list li {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ================= BOUTON ACTION ================= */
+.btn-action {
+    display: inline-block;
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(66, 153, 225, 0.4);
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+}
+
+.btn-action:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dossier-container">
+    <!-- ================= PATIENT ================= -->
+    <h1>🧠 Dossier médical</h1>
+
+    <a
+       href="{{ path('medecin_patient_dossier_pdf', {id: patient.id}) }}"
+       target="_blank"
+       class="btn-action"
+    >
+    📄 Télécharger le dossier médical (PDF)
+    </a>
+
+    <div class="patient-info">
+        <h2>👤 {{ patient.prenom }} {{ patient.nom }}</h2>
+        <p>📧 {{ patient.email }}</p>
+        <p>📞 {{ patient.telephone|default('Non renseigné') }}</p>
+    </div>
+
+    <hr>
+
+    <!-- ================= HISTORIQUE RDV ================= -->
+    <h3>📋 Historique des rendez-vous (avec vous)</h3>
+
+    <ul class="list">
+        {% for rdv in rdvs %}
+            <li>
+                <strong>{{ rdv.date|date('d/m/Y H:i') }}</strong>
+                – {{ rdv.mode|capitalize }}
+                – <span class="badge badge-{{ rdv.statut }}">
+                    {{ rdv.statut|replace({'_':' '})|capitalize }}
+                  </span>
+            </li>
+        {% else %}
+            <li class="empty">Aucun rendez-vous avec ce patient</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <!-- ================= ORDONNANCES ================= -->
+    <h3>💊 Ordonnances (que vous avez créées)</h3>
+
+    <ul class="list">
+        {% for ordonnance in ordonnances %}
+            <li>
+                <strong>{{ ordonnance.createdAt|date('d/m/Y') }}</strong>
+                – {{ ordonnance.contenu|slice(0, 80) }}{% if ordonnance.contenu|length > 80 %}…{% endif %}
+            </li>
+        {% else %}
+            <li class="empty">Aucune ordonnance pour ce patient</li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endblock %}
