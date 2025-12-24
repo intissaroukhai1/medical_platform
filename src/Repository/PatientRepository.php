@@ -28,5 +28,15 @@ public function findPatientsForSecretaireMedecin(Medecin $medecin): array
         ->getQuery()
         ->getResult();
 }
+public function countByMedecin(Medecin $medecin): int
+{
+    return (int) $this->createQueryBuilder('p')
+        ->select('COUNT(DISTINCT p.id)')
+        ->innerJoin('p.rendezVous', 'r')
+        ->andWhere('r.medecin = :medecin')
+        ->setParameter('medecin', $medecin)
+        ->getQuery()
+        ->getSingleScalarResult();
+}
 
 }

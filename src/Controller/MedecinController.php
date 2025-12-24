@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Medecin;
+use App\Repository\OrdonnanceRepository;
+use App\Repository\PatientRepository;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\MedecinProfileType;
 use Symfony\Component\HttpFoundation\JsonResponse; 
@@ -15,18 +17,40 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class MedecinController extends AbstractController
 {
    #[Route('/medecin/dashboard', name: 'medecin_dashboard')]
-public function dashboard(RendezVousRepository $rdvRepo): Response
+public function dashboard(Request $request,RendezVousRepository $rdvRepo, PatientRepository $patientRepo,OrdonnanceRepository $ordonnanceRepo): Response
 {
     /** @var Medecin $medecin */
     $medecin = $this->getUser();
+      // 🗓️ MOIS / ANNÉE (TOUJOURS AVANT)
+    $year  = (int) ($request->query->get('year') ?? date('Y'));
+    $month = (int) ($request->query->get('month') ?? date('m'));
+
 
     // 🔥 RDV ACCEPTÉS par la secrétaire
     $rdvAcceptes = $rdvRepo->findAcceptedByMedecin($medecin);
+      $rdvMonthCount = $rdvRepo->countMonthAcceptedByMedecin($medecin);
+       $patientsCount = $patientRepo->countByMedecin($medecin);
+       $ordonnancesMonthCount = $ordonnanceRepo->countMonthByMedecin($medecin);
+       $rdvDatesRaw = $rdvRepo->findRdvDaysForMonth($medecin, $year, $month);
+
+
+$rdvDays = array_map(
+    fn ($row) => $row['date']->format('Y-m-d'),
+    $rdvDatesRaw
+);
+
 
     return $this->render('medecin/dashboard.html.twig', [
         "medecin"     => $medecin,
         "rdv_today"   => $rdvAcceptes,   // 👈 ICI LA CLÉ
+       'rdvMonthCount'  => $rdvMonthCount, 
         "patients"    => [],
+          'patientsCount'  => $patientsCount, // 👈
+           'ordonnancesMonthCount' => $ordonnancesMonthCount,
+           // 🗓️ Calendrier
+    'calendarYear'  => $year,
+        'calendarMonth' => $month,
+     'rdvDays' => $rdvDays,
         "ordonnances" => []
     ]);
 }

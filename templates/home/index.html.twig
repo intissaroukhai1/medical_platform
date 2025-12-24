@@ -5,7 +5,7 @@
 {% block navbar %}
 <nav class="navbar">
     <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">
-        🏥 DAWINI
+         ⚕️ DAWINI
     </div>
     <div>
         <a href="{{ path('app_login') }}" class="nav-item">Connexion</a>
@@ -15,48 +15,398 @@
 {% endblock %}
 
 {% block public_content %}
-<div style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 4rem 2rem; text-align: center;">
-    <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">Trouvez le Médecin Idéal</h1>
-    <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9;">Accédez aux meilleurs professionnels de santé près de chez vous</p>
+
+{# ========== HERO SECTION ========== #}
+<div style="background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%); color: white; padding: 5rem 2rem; text-align: center; position: relative; overflow: hidden;">
     
-    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto;">
-        <input type="text" placeholder="Rechercher une spécialité..." 
-            style="padding: 0.75rem 1rem; border-radius: 0.5rem; flex: 1; min-width: 250px; border: none;">
-        <input type="text" placeholder="Ville ou code postal..." 
-            style="padding: 0.75rem 1rem; border-radius: 0.5rem; flex: 1; min-width: 250px; border: none;">
-        <button class="btn-primary" style="background-color: var(--accent);">Rechercher</button>
+    {# Motif médical en arrière-plan #}
+    <div style="position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.3) 35px, rgba(255,255,255,.3) 70px);"></div>
+    
+    <div style="position: relative; z-index: 1; max-width: 1200px; margin: 0 auto;">
+        <div style="display: inline-block; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 0.5rem 1.5rem; border-radius: 2rem; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 600;">
+            🚑 Médecins disponibles en urgence 24/24 près de vous
+        </div>
+        
+        <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 1rem; line-height: 1.2;">
+            Trouvez un Médecin Près de Vous
+        </h1>
+        
+        <p style="font-size: 1.25rem; margin-bottom: 3rem; opacity: 0.95; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Utilisez votre localisation pour trouver les professionnels de santé disponibles immédiatement
+        </p>
+
+        {# ========== RECHERCHE PAR GPS ========== #}
+        <form method="get" 
+              action="{{ path('home') }}"
+              id="searchForm"
+              style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto; background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+
+            <select name="specialite"
+                    style="padding: 0.875rem 1.25rem; border-radius: 0.75rem; flex: 1; min-width: 250px; border: 2px solid #E5E7EB; font-size: 1rem; color: #374151; background: white; cursor: pointer; transition: all 0.2s;">
+                <option value="">🩺 Toutes les spécialités</option>
+                {% for s in specialites %}
+                    <option value="{{ s.id }}" {{ app.request.get('specialite') == s.id ? 'selected' : '' }}>
+                        {{ s.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="button" 
+                    id="gpsButton"
+                    onclick="getLocation()"
+                    style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 0.875rem 2rem; font-weight: 600; font-size: 1rem; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); transition: all 0.3s; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 0.5rem; min-width: 200px; justify-content: center;">
+                <span id="buttonIcon">📍</span>
+                <span id="buttonText">Me Localiser</span>
+            </button>
+        </form>
+
+        {# Message de statut #}
+        <div id="statusMessage" style="margin-top: 1.5rem; padding: 1rem; border-radius: 0.75rem; display: none; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
     </div>
 </div>
 
-<div style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
-    <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 3rem; text-align: center;">Spécialités Principales</h2>
-    
+{# ========== RÉSULTATS DE RECHERCHE ========== #}
+{% if medecins is defined %}
+    <div style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; background: #F9FAFB;">
+
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-size: 2.5rem; font-weight: 800; color: #111827; margin-bottom: 0.5rem;">
+                {% if medecins|length > 0 %}
+                    🚑 {{ medecins|length }} Médecin(s) Disponible(s) en Urgence
+                {% else %}
+                    Aucun Résultat
+                {% endif %}
+            </h2>
+            {% if app.request.get('latitude') and app.request.get('longitude') %}
+                <p style="color: #6B7280; font-size: 1.1rem;">
+                    📍 Près de votre position
+                    {% if app.request.get('specialite') %}
+                        - <strong>{{ specialites|filter(s => s.id == app.request.get('specialite'))|first.nom }}</strong>
+                    {% endif %}
+                </p>
+            {% endif %}
+        </div>
+
+        {% if medecins|length > 0 %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                {% for m in medecins %}
+                    <div class="card" style="background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.3s; border: 2px solid transparent; position: relative; overflow: hidden;">
+                        
+                        {# Badge urgence #}
+                        <div style="position: absolute; top: 1rem; right: 1rem; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.3rem; animation: pulse 2s infinite;">
+                            🚑 DISPONIBLE
+                        </div>
+
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem;">
+                            👨‍⚕️
+                        </div>
+
+                        <h3 style="font-size: 1.5rem; font-weight: 700; text-align: center; color: #111827; margin-bottom: 1rem;">
+                            Dr {{ m.prenom }} {{ m.nom }}
+                        </h3>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1rem;">
+                            {% for s in m.specialites %}
+                                <span class="badge" style="background: #DBEAFE; color: #1E40AF; padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600;">
+                                    {{ s.nom }}
+                                </span>
+                            {% endfor %}
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: #6B7280; margin-bottom: 0.5rem; font-size: 1rem;">
+                            <span>📍</span>
+                            <span style="font-weight: 500;">{{ m.ville }}</span>
+                        </div>
+
+                        {% if m.distance is defined %}
+                            <div style="text-align: center; color: #10B981; font-weight: 600; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                                🚶 À {{ m.distance }} km
+                            </div>
+                        {% endif %}
+
+                        
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">😕</div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem;">
+                    Aucun médecin disponible en urgence
+                </h3>
+                <p style="color: #6B7280; margin-bottom: 2rem;">
+                    Essayez d'élargir votre zone de recherche ou modifier la spécialité
+                </p>
+                <button onclick="window.location.reload()" class="btn-primary" style="display: inline-block; padding: 0.75rem 2rem;">
+                    Nouvelle recherche
+                </button>
+            </div>
+        {% endif %}
+
+    </div>
+{% endif %}
+
+{# ========== SPÉCIALITÉS PRINCIPALES ========== #}
+<div style="padding: 5rem 2rem; max-width: 1200px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 4rem;">
+        <div style="display: inline-block; background: #DBEAFE; color: #1E40AF; padding: 0.5rem 1.5rem; border-radius: 2rem; margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;">
+            Nos Spécialités
+        </div>
+        <h2 style="font-size: 2.5rem; font-weight: 800; color: #111827; margin-bottom: 1rem;">
+            Trouvez Votre Spécialiste
+        </h2>
+        <p style="color: #6B7280; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Des professionnels qualifiés disponibles en urgence dans toutes les spécialités
+        </p>
+    </div>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        {% set icons = {
+            'Cardiologie': '❤️',
+            'Dermatologie': '🩺',
+            'Pédiatrie': '👶',
+            'Ophtalmologie': '👁️',
+            'Dentisterie': '🦷',
+            'Psychiatrie': '💭',
+            'Orthopédie': '🦴',
+            'Gynécologie': '♀️',
+            'Hématologie':'🩸',
+            'Neurologie':'🧠',
+            'Médecine Générale':'👩‍⚕️'
+        
+        } %}
+        
         {% for specialite in specialites %}
-        <div class="card" style="text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
-            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{ specialite.nom }}</h3>
-            <p style="color: #6B7280; margin-bottom: 1rem;">{{ specialite.description }}</p>
-            <a href="#" class="btn-primary" style="display: inline-block;">Voir les médecins</a>
+        <div class="card" style="background: white; border-radius: 1rem; padding: 2rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.3s; border: 2px solid transparent; cursor: pointer;">
+            
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem;">
+                {{ icons[specialite.nom] ?? '🏥' }}
+            </div>
+            
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">
+                {{ specialite.nom }}
+            </h3>
+            
+            <p style="color: #6B7280; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem;">
+                {{ specialite.description }}
+            </p>
+            
+            <button onclick="searchBySpecialty({{ specialite.id }})" 
+                    class="btn-primary" 
+                    style="display: inline-block; background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%); padding: 0.75rem 1.5rem; font-weight: 600; border-radius: 0.75rem; border: none; cursor: pointer; color: white; transition: all 0.3s; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);">
+                📍 Trouver près de moi →
+            </button>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<div style="background-color: var(--neutral-light); padding: 3rem 2rem;">
-    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; text-align: center;">
-        <div>
-            <div style="font-size: 2rem; font-weight: 700; color: var(--primary);">500+</div>
-            <p>Médecins Disponibles</p>
+{# ========== STATISTIQUES ========== #}
+<div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); padding: 4rem 2rem;">
+    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; text-align: center;">
+        
+        <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <div style="font-size: 3.5rem; font-weight: 800; background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
+                500+
+            </div>
+            <p style="color: #374151; font-weight: 600; font-size: 1.1rem;">Médecins Disponibles</p>
         </div>
-        <div>
-            <div style="font-size: 2rem; font-weight: 700; color: var(--secondary);">10k+</div>
-            <p>Consultations Réussies</p>
+        
+        <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <div style="font-size: 3.5rem; font-weight: 800; background: linear-gradient(135deg, #10B981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
+                24/7
+            </div>
+            <p style="color: #374151; font-weight: 600; font-size: 1.1rem;">Service d'Urgence</p>
         </div>
-        <div>
-            <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">4.8/5</div>
-            <p>Note Moyenne</p>
+        
+        <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <div style="font-size: 3.5rem; font-weight: 800; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">
+                4.8/5
+            </div>
+            <p style="color: #374161; font-weight: 600; font-size: 1.1rem;">Note Moyenne</p>
         </div>
+        
     </div>
 </div>
+
+{# ========== COMMENT ÇA MARCHE ========== #}
+<div style="padding: 5rem 2rem; max-width: 1200px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-size: 2.5rem; font-weight: 800; color: #111827; margin-bottom: 1rem;">
+            Comment Ça Marche ?
+        </h2>
+        <p style="color: #6B7280; font-size: 1.1rem;">
+            Trouvez un médecin en 3 clics
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem;">
+        
+        <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; font-weight: 800; color: white;">
+                1
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">
+                📍 Localisez-vous
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Cliquez sur "Me Localiser" pour activer votre GPS et trouver les médecins près de vous
+            </p>
+        </div>
+
+        <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #10B981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; font-weight: 800; color: white;">
+                2
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">
+                🩺 Choisissez
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Sélectionnez le médecin disponible le plus proche selon votre spécialité
+            </p>
+        </div>
+
+        <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; font-weight: 800; color: white;">
+                3
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">
+                💊 Consultez
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Rendez-vous au cabinet et bénéficiez d'une consultation d'urgence immédiate
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<style>
+/* Animations et effets hover */
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+    border-color: #0EA5E9 !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.5) !important;
+}
+
+select:focus {
+    outline: none;
+    border-color: #0EA5E9 !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem !important;
+    }
+    
+    form {
+        flex-direction: column;
+    }
+    
+    select, button {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+
+// ================= GEOLOCALISATION =================
+function getLocation() {
+    const button = document.getElementById('gpsButton');
+    const buttonIcon = document.getElementById('buttonIcon');
+    const buttonText = document.getElementById('buttonText');
+
+    if (!navigator.geolocation) {
+        showMessage("❌ Géolocalisation non supportée", "error");
+        return;
+    }
+
+    buttonIcon.textContent = '⏳';
+    buttonText.textContent = 'Localisation...';
+    button.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            document.getElementById('latitude').value = position.coords.latitude;
+            document.getElementById('longitude').value = position.coords.longitude;
+
+            showMessage("📍 Position détectée, recherche en cours...", "success");
+
+            setTimeout(() => {
+                document.getElementById('searchForm').submit();
+            }, 800);
+        },
+        function () {
+            showMessage("❌ Autorisation GPS refusée", "error");
+            button.disabled = false;
+            buttonIcon.textContent = '📍';
+            buttonText.textContent = 'Me localiser';
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+    );
+}
+
+function showMessage(text, type) {
+    const msg = document.getElementById('statusMessage');
+    msg.textContent = text;
+    msg.style.display = 'block';
+    msg.style.background = type === 'success'
+        ? 'rgba(16,185,129,0.2)'
+        : 'rgba(239,68,68,0.2)';
+    msg.style.border = type === 'success'
+        ? '2px solid #10B981'
+        : '2px solid #EF4444';
+}
+
+function searchBySpecialty(id) {
+    document.querySelector('select[name="specialite"]').value = id;
+    getLocation();
+}
+
+// ================= CARTE LEAFLET =================
+window.addEventListener('load', function () {
+    if (!userLat || !userLng || medecins.length === 0) return;
+
+    const map = L.map('map').setView([userLat, userLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // 📍 Position utilisateur
+    L.marker([userLat, userLng])
+        .addTo(map)
+        .bindPopup("📍 Vous êtes ici")
+        .openPopup();
+
+    // 👨‍⚕️ Médecins
+    medecins.forEach(m => {
+        if (m.latitude && m.longitude) {
+            L.marker([m.latitude, m.longitude])
+                .addTo(map)
+                .bindPopup(
+                    `<strong>Dr ${m.prenom} ${m.nom}</strong><br>${m.ville}<br>🚑 Urgence`
+                );
+        }
+    });
+});
+</script>
+
+
 {% endblock %}

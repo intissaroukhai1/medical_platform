@@ -33,11 +33,13 @@
 <div class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <div class="card-title">RDV Aujourd'hui</div>
+           <div class="card-title">RDV ce mois</div>
             <div class="card-icon">📅</div>
         </div>
-        <div class="card-value">5</div>
-        <div class="card-description">Consultations prévues</div>
+         <div class="card-value">
+        {{ rdvMonthCount }}
+    </div>
+        <div class="card-description">Consultations prévues ce mois</div>
     </div>
 
     <div class="card">
@@ -45,7 +47,10 @@
             <div class="card-title">Patients</div>
             <div class="card-icon">👥</div>
         </div>
-        <div class="card-value">142</div>
+        <div class="card-value">
+    {{ patientsCount }}
+</div>
+
         <div class="card-description">Sous suivi</div>
     </div>
 
@@ -54,7 +59,7 @@
             <div class="card-title">Ordonnances</div>
             <div class="card-icon">💊</div>
         </div>
-        <div class="card-value">28</div>
+         <div class="card-value">{{ ordonnancesMonthCount }}</div>
         <div class="card-description">Ce mois</div>
     </div>
 
@@ -71,10 +76,10 @@
 <!-- Calendar Section -->
 <div class="calendar-section">
     <div class="calendar-header">
-        <h2 class="section-title">📅 Calendrier - Décembre 2025</h2>
+        <h2 class="section-title">📅 Calendrier - {{ date(calendarYear ~ '-' ~ calendarMonth ~ '-01')|date('F Y') }}</h2>
         <div class="calendar-nav">
-            <button onclick="previousMonth()">←</button>
-            <button onclick="nextMonth()">→</button>
+            <button type="button" onclick="previousMonth()">←</button>
+<button type="button" onclick="nextMonth()">→</button>
         </div>
     </div>
 
@@ -87,47 +92,41 @@
         <div class="weekday">Sam</div>
         <div class="weekday">Dim</div>
     </div>
+{% set currentMonth = date(calendarYear ~ '-' ~ calendarMonth ~ '-01') %}
+    {% set firstDay = currentMonth|date_modify('first day of this month') %}
+{% set daysInMonth = firstDay|date('t') %}
+{% set startWeekDay = firstDay|date('N') %}
 
-    <div class="days">
-        <div class="day">25</div>
-        <div class="day">26</div>
-        <div class="day">27</div>
-        <div class="day">28</div>
-        <div class="day">29</div>
-        <div class="day">30</div>
-        <div class="day">1</div>
-        <div class="day">2</div>
-        <div class="day">3</div>
-        <div class="day today">4</div>
-        <div class="day has-appointment">5</div>
-        <div class="day">6</div>
-        <div class="day">7</div>
-        <div class="day">8</div>
-        <div class="day">9</div>
-        <div class="day">10</div>
-        <div class="day">11</div>
-        <div class="day">12</div>
-        <div class="day has-appointment">13</div>
-        <div class="day">14</div>
-        <div class="day">15</div>
-        <div class="day">16</div>
-        <div class="day">17</div>
-        <div class="day">18</div>
-        <div class="day">19</div>
-        <div class="day">20</div>
-        <div class="day">21</div>
-        <div class="day">22</div>
-        <div class="day">23</div>
-        <div class="day">24</div>
-        <div class="day">25</div>
-    </div>
+<div class="days">
+
+    {# ⬅️ Jours vides avant le 1er #}
+    {% for i in 1..(startWeekDay - 1) %}
+        <div class="day empty"></div>
+    {% endfor %}
+
+    {# 📆 Jours du mois #}
+    {% for day in 1..daysInMonth %}
+        {% set fullDate = currentMonth|date('Y-m') ~ '-' ~ '%02d'|format(day) %}
+
+        <div class="
+            day
+            {% if fullDate == 'now'|date('Y-m-d') %} today {% endif %}
+            {% if fullDate in rdvDays %} has-appointment {% endif %}
+        ">
+            {{ day }}
+        </div>
+    {% endfor %}
+
+</div>
+
 </div>
 
 <!-- Appointments -->
+{#
 <div class="appointments-section">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h2 class="section-title">🩺 Consultations d'Aujourd'hui</h2>
-        <button class="btn btn-primary" onclick="alert('Ajouter une consultation')">+ Ajouter</button>
+       
     </div>
 
     <div class="appointment-item">
@@ -243,6 +242,41 @@
         </div>
         <button class="btn btn-primary" onclick="alert('Voir dossier')">Voir Dossier</button>
     </div>
-</div>
+</div>#}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+<script>
+  let year = {{ calendarYear }};
+  let month = {{ calendarMonth }};
+
+  function goToMonth(y, m) {
+    const mm = String(m).padStart(2, '0');
+    window.location.href =
+      "{{ path('medecin_dashboard') }}" + "?year=" + y + "&month=" + mm;
+  }
+
+  function previousMonth() {
+    if (month === 1) {
+      month = 12;
+      year--;
+    } else {
+      month--;
+    }
+    goToMonth(year, month);
+  }
+
+  function nextMonth() {
+    if (month === 12) {
+      month = 1;
+      year++;
+    } else {
+      month++;
+    }
+    goToMonth(year, month);
+  }
+</script>
+
+
 
 {% endblock %}

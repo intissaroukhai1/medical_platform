@@ -168,5 +168,4 @@ public function print(
         'ordonnance' => $ordonnance,
     ]);
 }
-
 }

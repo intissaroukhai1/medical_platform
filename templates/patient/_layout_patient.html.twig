@@ -81,7 +81,7 @@
     }
 
     .sidebar-logo::before {
-        content: "🏥";
+        content: "⚕️";
         font-size: 2.5rem;
         filter: drop-shadow(0 4px 8px rgba(255, 255, 255, 0.3));
     }
@@ -448,27 +448,28 @@
     <span>Rendez-vous</span>
 </a>
         </li>
-        <li>
+       {# <li>
             <a href="#" 
                class="{{ app.request.attributes.get('_route') starts with 'patient_medical' ? 'active' : '' }}">
                 <span>📋</span>
                 <span>Dossier Médical</span>
             </a>
-        </li>
+        </li>#}
         <li>
-            <a href="#" 
-               class="{{ app.request.attributes.get('_route') starts with 'patient_prescription' ? 'active' : '' }}">
-                <span>💊</span>
-                <span>Ordonnances</span>
-            </a>
+          <a href="{{ path('patient_ordonnances') }}"
+   class="{{ app.request.attributes.get('_route') starts with 'patient_ordonnances' ? 'active' : '' }}">
+    <span>💊</span>
+    <span>Ordonnances</span>
+</a>
+
         </li>
-        <li>
+       {# <li>
             <a href="#" 
                class="{{ app.request.attributes.get('_route') starts with 'patient_search' ? 'active' : '' }}">
                 <span>🔍</span>
                 <span>Chercher Médecin</span>
             </a>
-        </li>
+        </li>#}
         <li>
             <a href="#" 
                class="{{ app.request.attributes.get('_route') starts with 'patient_profile' ? 'active' : '' }}">

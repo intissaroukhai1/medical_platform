@@ -289,32 +289,37 @@
 {% block page_content %}
 <!-- Stats Cards -->
 <div class="dashboard-grid">
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">Rendez-vous</div>
-            <div class="card-icon">📅</div>
-        </div>
-        <div class="card-value">{{ stats.appointments ?? 3 }}</div>
-        <div class="card-description">À venir ce mois</div>
+  <div class="card">
+    <div class="card-header">
+        <div class="card-title">Rendez-vous</div>
+        <div class="card-icon">📅</div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">Médecins</div>
-            <div class="card-icon">👨‍⚕️</div>
-        </div>
-        <div class="card-value">{{ stats.doctors ?? 5 }}</div>
-        <div class="card-description">Spécialistes en suivi</div>
-    </div>
+    <div class="card-value">{{ rdvCount }}</div>
+
+    <div class="card-description">À venir ce mois</div>
+</div>
 
     <div class="card">
-        <div class="card-header">
-            <div class="card-title">Ordonnances</div>
-            <div class="card-icon">💊</div>
-        </div>
-        <div class="card-value">{{ stats.prescriptions ?? 8 }}</div>
-        <div class="card-description">Actives</div>
+    <div class="card-header">
+        <div class="card-title">Médecins</div>
+        <div class="card-icon">👨‍⚕️</div>
     </div>
+
+    <div class="card-value">{{ medecinsCount }}</div>
+
+    <div class="card-description">Spécialistes en suivi</div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">Ordonnances</div>
+        <div class="card-icon">💊</div>
+    </div>
+
+    <div class="card-value">{{ ordonnancesCount }}</div>
+
+    <div class="card-description">Total</div>
+</div>
 
     <div class="card">
         <div class="card-header">
@@ -380,7 +385,7 @@
 
 
 <!-- Medical Records Section -->
-<div class="medical-records">
+{#<div class="medical-records">
     <h2 class="section-title" style="margin-bottom: 1.5rem;">📋 Dossier Médical</h2>
 
     {% if records is defined and records|length > 0 %}
@@ -410,5 +415,5 @@
             <div class="record-date">📅 15 Décembre 2024</div>
         </div>
     {% endif %}
-</div>
+</div>#}
 {% endblock %}

@@ -1,0 +1,256 @@
+{% extends 'patient/_layout_patient.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* ========================================
+           CSS Moderne pour la page Mes Ordonnances
+           ======================================== */
+
+        /* Titre principal */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        /* Message vide */
+        p {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #6c757d;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Container de la liste */
+        .list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Cartes d'ordonnances */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            animation: slideInUp 0.6s ease-out backwards;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+            border-color: #667eea;
+        }
+
+        /* Styling des divs dans les cartes */
+        .card > div {
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .card > div:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Labels (strong) */
+        .card strong {
+            display: inline-block;
+            color: #667eea;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Contenu après le strong */
+        .card div:nth-child(1)::after,
+        .card div:nth-child(2)::after {
+            content: '';
+            display: block;
+            height: 1px;
+            background: linear-gradient(90deg, #e9ecef 0%, transparent 100%);
+            margin-top: 0.8rem;
+        }
+
+        /* Section contenu (dernière div) */
+        .card > div:last-child {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .card > div:last-child strong {
+            display: block;
+            margin-bottom: 0.8rem;
+        }
+
+        /* Animation de la carte à l'index */
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .list {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .card > div:last-child {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .card {
+                border-radius: 15px;
+            }
+
+            .card strong {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Effet de brillance au survol */
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: left 0.6s ease;
+        }
+
+        .card:hover::after {
+            left: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block page_content %}
+    <h1>💊 Mes Ordonnances</h1>
+
+    {% if ordonnances is empty %}
+        <p>Aucune ordonnance disponible.</p>
+    {% else %}
+        <div class="list">
+            {% for ordonnance in ordonnances %}
+                <div class="card">
+                    <div>
+                        <strong>Date :</strong>
+                        {{ ordonnance.createdAt|date('d/m/Y') }}
+                    </div>
+                    <div>
+                        <strong>Médecin :</strong>
+                        Dr. {{ ordonnance.medecin.prenom }} {{ ordonnance.medecin.nom }}
+                    </div>
+                    <div>
+                        <strong>Contenu :</strong><br>
+                        {{ ordonnance.contenu|nl2br }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

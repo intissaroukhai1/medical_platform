@@ -35,24 +35,23 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-label">Utilisateurs Totaux</div>
-        <div class="stat-value">1 247</div>
-        <div class="stat-change">↑ 12% ce mois</div>
+<div class="stat-value">{{ usersCount }}</div>        <div class="stat-change">↑ 12% ce mois</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Médecins Actifs</div>
-        <div class="stat-value">87</div>
+        <div class="stat-value">{{ medecinsCount }}</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Consultations</div>
-        <div class="stat-value">5 234</div>
-    </div>
+<div class="stat-value">{{ consultationsCount }}</div>    </div>
 
     <div class="stat-card">
         <div class="stat-label">Revenus</div>
-        <div class="stat-value">45 230 DH</div>
-    </div>
+<div class="stat-value">
+    {{ revenus|number_format(0, '.', ' ') }} DH
+</div>    </div>
 </div>
 
 {% endblock %}
